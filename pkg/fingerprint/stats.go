@@ -246,7 +246,15 @@ func AnalyzeTelemetry(filePath string, filter *StatsFilter) (*TelemetryStats, er
 		productList = append(productList, *pc)
 	}
 	sort.Slice(productList, func(i, j int) bool {
-		return productList[i].Count > productList[j].Count
+		if productList[i].Count != productList[j].Count {
+			return productList[i].Count > productList[j].Count
+		}
+		// Secondary sort by product name for deterministic ordering when counts are equal
+		if productList[i].Product != productList[j].Product {
+			return productList[i].Product < productList[j].Product
+		}
+		// Tertiary sort by vendor
+		return productList[i].Vendor < productList[j].Vendor
 	})
 
 	if len(productList) > filter.TopN {

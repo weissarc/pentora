@@ -59,11 +59,14 @@ func TestAnalyzeTelemetry(t *testing.T) {
 		require.Equal(t, 1, sshStats.Rejections)
 		require.InDelta(t, 0.95, sshStats.AvgConfidence, 0.01)
 
-		// Verify top products
+		// Verify top products (sorted by count descending, then product name ascending for determinism)
 		require.Len(t, stats.TopProducts, 2)
-		require.Equal(t, "OpenSSH", stats.TopProducts[0].Product)
-		require.Equal(t, "OpenBSD", stats.TopProducts[0].Vendor)
+		require.Equal(t, "Apache", stats.TopProducts[0].Product)
+		require.Equal(t, "Apache", stats.TopProducts[0].Vendor)
 		require.Equal(t, 1, stats.TopProducts[0].Count)
+		require.Equal(t, "OpenSSH", stats.TopProducts[1].Product)
+		require.Equal(t, "OpenBSD", stats.TopProducts[1].Vendor)
+		require.Equal(t, 1, stats.TopProducts[1].Count)
 
 		// Verify rejection reasons
 		require.Len(t, stats.RejectionReasons, 1)
