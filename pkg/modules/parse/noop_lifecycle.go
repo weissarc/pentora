@@ -25,12 +25,12 @@ func (m *noopLifecycleModule) Metadata() engine.ModuleMetadata {
 	}
 }
 
-func (m *noopLifecycleModule) Init(instanceID string, _ map[string]interface{}) error {
+func (m *noopLifecycleModule) Init(instanceID string, _ map[string]any) error {
 	m.instanceID = instanceID
 	return nil
 }
 
-func (m *noopLifecycleModule) Execute(ctx context.Context, _ map[string]interface{}, _ chan<- engine.ModuleOutput) error {
+func (m *noopLifecycleModule) Execute(ctx context.Context, _ map[string]any, _ chan<- engine.ModuleOutput) error {
 	// No-op
 	_ = ctx
 	return nil

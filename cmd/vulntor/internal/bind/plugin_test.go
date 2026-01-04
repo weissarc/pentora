@@ -12,13 +12,13 @@ import (
 func TestBindInstallOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		flags   map[string]interface{}
+		flags   map[string]any
 		want    plugin.InstallOptions
 		wantErr bool
 	}{
 		{
 			name: "all flags set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"source": "official",
 				"force":  true,
 			},
@@ -30,7 +30,7 @@ func TestBindInstallOptions(t *testing.T) {
 		},
 		{
 			name: "only source set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"source": "github",
 				"force":  false,
 			},
@@ -42,7 +42,7 @@ func TestBindInstallOptions(t *testing.T) {
 		},
 		{
 			name: "invalid source",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"source": "custom",
 				"force":  false,
 			},
@@ -51,7 +51,7 @@ func TestBindInstallOptions(t *testing.T) {
 		},
 		{
 			name: "only force set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"source": "",
 				"force":  true,
 			},
@@ -63,7 +63,7 @@ func TestBindInstallOptions(t *testing.T) {
 		},
 		{
 			name: "no flags set (defaults)",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"source": "",
 				"force":  false,
 			},
@@ -94,13 +94,13 @@ func TestBindInstallOptions(t *testing.T) {
 func TestBindUpdateOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		flags   map[string]interface{}
+		flags   map[string]any
 		want    plugin.UpdateOptions
 		wantErr bool
 	}{
 		{
 			name: "all flags set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"category": "ssh",
 				"source":   "official",
 				"force":    true,
@@ -116,7 +116,7 @@ func TestBindUpdateOptions(t *testing.T) {
 		},
 		{
 			name: "only category set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"category": "http",
 				"source":   "",
 				"force":    false,
@@ -132,7 +132,7 @@ func TestBindUpdateOptions(t *testing.T) {
 		},
 		{
 			name: "no flags set (defaults)",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"category": "",
 				"source":   "",
 				"force":    false,
@@ -148,7 +148,7 @@ func TestBindUpdateOptions(t *testing.T) {
 		},
 		{
 			name: "dry-run only",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"category": "",
 				"source":   "",
 				"force":    false,
@@ -164,7 +164,7 @@ func TestBindUpdateOptions(t *testing.T) {
 		},
 		{
 			name: "invalid category",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"category": "invalid",
 				"source":   "",
 				"force":    false,
@@ -175,7 +175,7 @@ func TestBindUpdateOptions(t *testing.T) {
 		},
 		{
 			name: "invalid source",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"category": "",
 				"source":   "custom",
 				"force":    false,
@@ -205,14 +205,14 @@ func TestBindUpdateOptions(t *testing.T) {
 func TestBindUninstallOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		flags   map[string]interface{}
+		flags   map[string]any
 		want    plugin.UninstallOptions
 		wantErr bool
 		errMsg  string
 	}{
 		{
 			name: "all flag set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"all":      true,
 				"category": "",
 			},
@@ -224,7 +224,7 @@ func TestBindUninstallOptions(t *testing.T) {
 		},
 		{
 			name: "category flag set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"all":      false,
 				"category": "ssh",
 			},
@@ -236,7 +236,7 @@ func TestBindUninstallOptions(t *testing.T) {
 		},
 		{
 			name: "no flags set (defaults)",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"all":      false,
 				"category": "",
 			},
@@ -248,7 +248,7 @@ func TestBindUninstallOptions(t *testing.T) {
 		},
 		{
 			name: "conflicting flags: all + category",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"all":      true,
 				"category": "http",
 			},
@@ -258,7 +258,7 @@ func TestBindUninstallOptions(t *testing.T) {
 		},
 		{
 			name: "invalid category",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"all":      false,
 				"category": "invalid",
 			},
@@ -288,7 +288,7 @@ func TestBindUninstallOptions(t *testing.T) {
 }
 
 // setupInstallCommand creates a mock command with install flags
-func setupInstallCommand(flags map[string]interface{}) *cobra.Command {
+func setupInstallCommand(flags map[string]any) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Flags().String("source", "", "Plugin source")
 	cmd.Flags().Bool("force", false, "Force install")
@@ -307,7 +307,7 @@ func setupInstallCommand(flags map[string]interface{}) *cobra.Command {
 }
 
 // setupUpdateCommand creates a mock command with update flags
-func setupUpdateCommand(flags map[string]interface{}) *cobra.Command {
+func setupUpdateCommand(flags map[string]any) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Flags().String("category", "", "Plugin category")
 	cmd.Flags().String("source", "", "Plugin source")
@@ -336,7 +336,7 @@ func setupUpdateCommand(flags map[string]interface{}) *cobra.Command {
 }
 
 // setupUninstallCommand creates a mock command with uninstall flags
-func setupUninstallCommand(flags map[string]interface{}) *cobra.Command {
+func setupUninstallCommand(flags map[string]any) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Flags().Bool("all", false, "Uninstall all")
 	cmd.Flags().String("category", "", "Plugin category")
@@ -357,14 +357,14 @@ func setupUninstallCommand(flags map[string]interface{}) *cobra.Command {
 func TestBindCleanOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		flags   map[string]interface{}
+		flags   map[string]any
 		want    plugin.CleanOptions
 		wantErr bool
 		errMsg  string
 	}{
 		{
 			name: "all flags set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"older-than": "720h",
 				"dry-run":    true,
 			},
@@ -376,7 +376,7 @@ func TestBindCleanOptions(t *testing.T) {
 		},
 		{
 			name: "only older-than set (default dry-run)",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"older-than": "168h",
 				"dry-run":    false,
 			},
@@ -388,7 +388,7 @@ func TestBindCleanOptions(t *testing.T) {
 		},
 		{
 			name: "default older-than with dry-run",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"older-than": "720h",
 				"dry-run":    true,
 			},
@@ -400,7 +400,7 @@ func TestBindCleanOptions(t *testing.T) {
 		},
 		{
 			name: "invalid duration format",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"older-than": "invalid",
 				"dry-run":    false,
 			},
@@ -432,13 +432,13 @@ func TestBindCleanOptions(t *testing.T) {
 func TestBindVerifyOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		flags   map[string]interface{}
+		flags   map[string]any
 		want    plugin.VerifyOptions
 		wantErr bool
 	}{
 		{
 			name: "plugin flag set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"plugin": "ssh-cve-2024-6387",
 			},
 			want: plugin.VerifyOptions{
@@ -448,7 +448,7 @@ func TestBindVerifyOptions(t *testing.T) {
 		},
 		{
 			name: "no plugin flag (verify all)",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"plugin": "",
 			},
 			want: plugin.VerifyOptions{
@@ -458,7 +458,7 @@ func TestBindVerifyOptions(t *testing.T) {
 		},
 		{
 			name: "plugin with version",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"plugin": "http-weak-ssl@1.0.0",
 			},
 			want: plugin.VerifyOptions{
@@ -485,7 +485,7 @@ func TestBindVerifyOptions(t *testing.T) {
 }
 
 // setupCleanCommand creates a mock command with clean flags
-func setupCleanCommand(flags map[string]interface{}) *cobra.Command {
+func setupCleanCommand(flags map[string]any) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Flags().String("older-than", "720h", "Duration")
 	cmd.Flags().Bool("dry-run", false, "Dry run")
@@ -504,7 +504,7 @@ func setupCleanCommand(flags map[string]interface{}) *cobra.Command {
 }
 
 // setupVerifyCommand creates a mock command with verify flags
-func setupVerifyCommand(flags map[string]interface{}) *cobra.Command {
+func setupVerifyCommand(flags map[string]any) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Flags().String("plugin", "", "Plugin name")
 

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -471,11 +472,8 @@ func (s *Service) filterByCategory(plugins []PluginManifestEntry, category Categ
 	var filtered []PluginManifestEntry
 
 	for _, p := range plugins {
-		for _, cat := range p.Categories {
-			if cat == category {
-				filtered = append(filtered, p)
-				break
-			}
+		if slices.Contains(p.Categories, category) {
+			filtered = append(filtered, p)
 		}
 	}
 
@@ -1162,11 +1160,8 @@ func (s *Service) filterManifestByCategory(entries []*ManifestEntry, category Ca
 	categoryStr := string(category)
 
 	for _, entry := range entries {
-		for _, tag := range entry.Tags {
-			if tag == categoryStr {
-				filtered = append(filtered, entry)
-				break
-			}
+		if slices.Contains(entry.Tags, categoryStr) {
+			filtered = append(filtered, entry)
 		}
 	}
 

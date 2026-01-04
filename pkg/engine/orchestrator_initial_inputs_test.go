@@ -16,7 +16,7 @@ func TestOrchestrator_InitialInputs_ConfigTargets_WrongType_Fallback(t *testing.
 	require.NoError(t, err)
 
 	// Pass wrong type (string instead of []string)
-	_, runErr := orc.Run(context.Background(), map[string]interface{}{"config.targets": "10.0.0.1"})
+	_, runErr := orc.Run(context.Background(), map[string]any{"config.targets": "10.0.0.1"})
 	require.NoError(t, runErr)
 
 	// Legacy storage should keep raw value accessible via GetAll

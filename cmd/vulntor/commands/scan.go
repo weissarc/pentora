@@ -53,7 +53,7 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 	logger.Info().Strs("targets", allTargets).Msg("Initializing scan command")
 
 	// Output pipeline: Emit initialization event
-	out.Diag(output.LevelVerbose, "Initializing scan command", map[string]interface{}{
+	out.Diag(output.LevelVerbose, "Initializing scan command", map[string]any{
 		"targets": allTargets,
 	})
 
@@ -138,14 +138,14 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 	return renderScanOutput(out, formatter, params, res, dataCtx, logger)
 }
 
-func extractDataContext(res *scanexec.Result) map[string]interface{} {
+func extractDataContext(res *scanexec.Result) map[string]any {
 	if res != nil && res.RawContext != nil {
 		return res.RawContext
 	}
-	return map[string]interface{}{}
+	return map[string]any{}
 }
 
-func renderScanOutput(out output.Output, formatter format.Formatter, params scanexec.Params, res *scanexec.Result, dataCtx map[string]interface{}, logger zerolog.Logger) error {
+func renderScanOutput(out output.Output, formatter format.Formatter, params scanexec.Params, res *scanexec.Result, dataCtx map[string]any, logger zerolog.Logger) error {
 	profiles, missingProfiles, profileErr := collectAssetProfiles(dataCtx)
 
 	if missingProfiles {
@@ -192,7 +192,7 @@ func renderScanOutput(out output.Output, formatter format.Formatter, params scan
 	return nil
 }
 
-func collectAssetProfiles(dataCtx map[string]interface{}) ([]engine.AssetProfile, bool, error) {
+func collectAssetProfiles(dataCtx map[string]any) ([]engine.AssetProfile, bool, error) {
 	const assetProfileDataKey = "asset.profiles"
 
 	rawProfiles, found := dataCtx[assetProfileDataKey]
@@ -200,7 +200,7 @@ func collectAssetProfiles(dataCtx map[string]interface{}) ([]engine.AssetProfile
 		return nil, true, nil
 	}
 
-	profileList, listOk := rawProfiles.([]interface{})
+	profileList, listOk := rawProfiles.([]any)
 	if !listOk {
 		return nil, false, fmt.Errorf("asset profile data has unexpected type: %T", rawProfiles)
 	}
@@ -222,7 +222,7 @@ func printAssetProfileTextOutput(out output.Output, profiles []engine.AssetProfi
 	for _, asset := range profiles {
 		// Target header
 		out.Info(fmt.Sprintf("\n## Target: %s (IPs: %v)", asset.Target, getMapKeys(asset.ResolvedIPs)))
-		out.Diag(output.LevelVerbose, "Asset details", map[string]interface{}{
+		out.Diag(output.LevelVerbose, "Asset details", map[string]any{
 			"target":    asset.Target,
 			"is_alive":  asset.IsAlive,
 			"hostnames": asset.Hostnames,

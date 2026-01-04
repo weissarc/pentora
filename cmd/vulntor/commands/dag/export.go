@@ -124,7 +124,7 @@ func createExampleDAG(opts bind.DAGExportOptions) *engine.DAGSchema {
 			"config.targets",
 			"config.ports",
 		},
-		Config: map[string]interface{}{
+		Config: map[string]any{
 			"targets": opts.Targets,
 			"ports":   opts.Ports,
 		},

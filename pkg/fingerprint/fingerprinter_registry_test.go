@@ -558,7 +558,7 @@ func TestConcurrentRegistration(t *testing.T) {
 	// Test concurrent registration doesn't cause races
 	done := make(chan bool, 10)
 
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		go func(id int) {
 			defer func() { done <- true }()
 
@@ -573,7 +573,7 @@ func TestConcurrentRegistration(t *testing.T) {
 	}
 
 	// Wait for all goroutines
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		<-done
 	}
 
@@ -593,7 +593,7 @@ func TestConcurrentRead(t *testing.T) {
 	done := make(chan bool, 100)
 
 	// Test concurrent reads
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		go func() {
 			defer func() { done <- true }()
 
@@ -605,7 +605,7 @@ func TestConcurrentRead(t *testing.T) {
 	}
 
 	// Wait for all goroutines
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		<-done
 	}
 }

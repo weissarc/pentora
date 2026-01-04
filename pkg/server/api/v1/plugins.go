@@ -623,7 +623,7 @@ func UninstallPluginHandler(pluginService PluginService, config api.Config) http
 			Int("remaining_count", result.RemainingCount).
 			Msg("uninstall succeeded")
 
-		api.WriteJSON(w, statusCode, map[string]interface{}{
+		api.WriteJSON(w, statusCode, map[string]any{
 			"message":       "plugin uninstalled successfully",
 			"removed_count": result.RemovedCount,
 		})

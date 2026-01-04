@@ -24,12 +24,12 @@ func (m *testLifecycleModule) Metadata() ModuleMetadata {
 	return ModuleMetadata{Name: "test.lifecycle", Type: ParseModuleType}
 }
 
-func (m *testLifecycleModule) Init(instanceID string, _ map[string]interface{}) error {
+func (m *testLifecycleModule) Init(instanceID string, _ map[string]any) error {
 	m.id = instanceID
 	return nil
 }
 
-func (m *testLifecycleModule) Execute(ctx context.Context, _ map[string]interface{}, out chan<- ModuleOutput) error {
+func (m *testLifecycleModule) Execute(ctx context.Context, _ map[string]any, out chan<- ModuleOutput) error {
 	if m.execDelay > 0 {
 		time.Sleep(m.execDelay)
 	}
@@ -82,8 +82,8 @@ func TestOrchestrator_Lifecycle_OrderAndTeardown(t *testing.T) {
 	dag := &DAGDefinition{
 		Name: "lifecycle-dag",
 		Nodes: []DAGNodeConfig{
-			{InstanceID: "A", ModuleType: "tlm-a", Config: map[string]interface{}{}},
-			{InstanceID: "B", ModuleType: "tlm-b", Config: map[string]interface{}{"__depends_on": []string{"A"}}},
+			{InstanceID: "A", ModuleType: "tlm-a", Config: map[string]any{}},
+			{InstanceID: "B", ModuleType: "tlm-b", Config: map[string]any{"__depends_on": []string{"A"}}},
 		},
 	}
 

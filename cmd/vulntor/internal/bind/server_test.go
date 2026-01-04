@@ -13,14 +13,14 @@ import (
 func TestBindServerOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		flags   map[string]interface{}
+		flags   map[string]any
 		want    ServerOptions
 		wantErr bool
 		errMsg  string
 	}{
 		{
 			name: "all flags set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"addr":             "0.0.0.0",
 				"port":             8080,
 				"no-ui":            false,
@@ -40,7 +40,7 @@ func TestBindServerOptions(t *testing.T) {
 		},
 		{
 			name: "defaults",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"addr":             "127.0.0.1",
 				"port":             8080,
 				"no-ui":            false,
@@ -60,7 +60,7 @@ func TestBindServerOptions(t *testing.T) {
 		},
 		{
 			name: "no-ui enabled",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"addr":             "127.0.0.1",
 				"port":             9000,
 				"no-ui":            true,
@@ -80,7 +80,7 @@ func TestBindServerOptions(t *testing.T) {
 		},
 		{
 			name: "invalid port - too low",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"addr":             "127.0.0.1",
 				"port":             0,
 				"no-ui":            false,
@@ -94,7 +94,7 @@ func TestBindServerOptions(t *testing.T) {
 		},
 		{
 			name: "invalid port - too high",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"addr":             "127.0.0.1",
 				"port":             70000,
 				"no-ui":            false,
@@ -108,7 +108,7 @@ func TestBindServerOptions(t *testing.T) {
 		},
 		{
 			name: "invalid concurrency",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"addr":             "127.0.0.1",
 				"port":             8080,
 				"no-ui":            false,
@@ -122,7 +122,7 @@ func TestBindServerOptions(t *testing.T) {
 		},
 		{
 			name: "both UI and API disabled",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"addr":             "127.0.0.1",
 				"port":             8080,
 				"no-ui":            true,
@@ -136,7 +136,7 @@ func TestBindServerOptions(t *testing.T) {
 		},
 		{
 			name: "high concurrency",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"addr":             "0.0.0.0",
 				"port":             443,
 				"no-ui":            false,
@@ -185,7 +185,7 @@ func TestBindServerOptions(t *testing.T) {
 }
 
 // setupServerCommand creates a mock command with server flags
-func setupServerCommand(flags map[string]interface{}) *cobra.Command {
+func setupServerCommand(flags map[string]any) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Flags().String("addr", "127.0.0.1", "Address")
 	cmd.Flags().Int("port", 8080, "Port")

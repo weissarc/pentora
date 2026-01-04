@@ -69,7 +69,7 @@ func TestReadyzHandler_MultipleReads(t *testing.T) {
 	handler := ReadyzHandler(ready)
 
 	// Multiple concurrent calls should all succeed
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		req := httptest.NewRequest(http.MethodGet, "/readyz", nil)
 		w := httptest.NewRecorder()
 

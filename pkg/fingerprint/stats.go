@@ -31,8 +31,8 @@ type TelemetryStats struct {
 	ConfidenceStats ConfidenceStat `json:"confidence_stats"`
 
 	// Time range
-	StartTime time.Time `json:"start_time,omitempty"`
-	EndTime   time.Time `json:"end_time,omitempty"`
+	StartTime time.Time `json:"start_time,omitzero"`
+	EndTime   time.Time `json:"end_time,omitzero"`
 }
 
 // ProtocolStat represents statistics for a specific protocol.

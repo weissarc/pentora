@@ -61,11 +61,11 @@ func (m *mockPlanner) PlanDAG(intent engine.ScanIntent) (*engine.DAGDefinition, 
 }
 
 type mockOrch struct {
-	out map[string]interface{}
+	out map[string]any
 	err error
 }
 
-func (m *mockOrch) Run(ctx context.Context, inputs map[string]interface{}) (map[string]interface{}, error) {
+func (m *mockOrch) Run(ctx context.Context, inputs map[string]any) (map[string]any, error) {
 	return m.out, m.err
 }
 
@@ -117,7 +117,7 @@ func TestRun_OrchestratorErrorAndStatus(t *testing.T) {
 	svc := NewService().
 		WithPlannerFactory(func(context.Context) (dagPlanner, error) { return &mockPlanner{def: def}, nil }).
 		WithOrchestratorFactory(func(d *engine.DAGDefinition) (orchestrator, error) {
-			return &mockOrch{out: map[string]interface{}{"discovery.live_hosts": []interface{}{}}, err: errors.New("run failed")}, nil
+			return &mockOrch{out: map[string]any{"discovery.live_hosts": []any{}}, err: errors.New("run failed")}, nil
 		})
 
 	res, e := svc.Run(ctx, Params{Targets: []string{"127.0.0.1"}})
@@ -202,10 +202,10 @@ func Test_WithProgressSink_And_WithStorage(t *testing.T) {
 	ctx = appctx.WithConfig(ctx, appMgr.Config())
 
 	def := &engine.DAGDefinition{Name: "test", Nodes: []engine.DAGNodeConfig{{InstanceID: "n1", ModuleType: "noop"}}}
-	orchOut := map[string]interface{}{
-		"discovery.live_hosts":  []interface{}{"127.0.0.1"},
-		"scan.services":         []interface{}{map[string]interface{}{"port": 80}},
-		"vulnerability.results": []interface{}{map[string]interface{}{"severity": "LOW"}},
+	orchOut := map[string]any{
+		"discovery.live_hosts":  []any{"127.0.0.1"},
+		"scan.services":         []any{map[string]any{"port": 80}},
+		"vulnerability.results": []any{map[string]any{"severity": "LOW"}},
 	}
 
 	// setup service with progress sink and storage

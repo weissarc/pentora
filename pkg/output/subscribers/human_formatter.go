@@ -103,14 +103,14 @@ func (s *HumanFormatter) Handle(event output.OutputEvent) {
 		s.printWarning(event.Message)
 
 	case output.EventTable:
-		if data, ok := event.Data.(map[string]interface{}); ok {
+		if data, ok := event.Data.(map[string]any); ok {
 			headers, _ := data["headers"].([]string)
 			rows, _ := data["rows"].([][]string)
 			s.printTable(headers, rows)
 		}
 
 	case output.EventProgress:
-		if data, ok := event.Data.(map[string]interface{}); ok {
+		if data, ok := event.Data.(map[string]any); ok {
 			current, _ := data["current"].(int)
 			total, _ := data["total"].(int)
 			s.printProgress(current, total, event.Message)

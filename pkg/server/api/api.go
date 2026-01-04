@@ -45,9 +45,9 @@ type ScanMetadata struct {
 
 // ScanDetail represents full scan details
 type ScanDetail struct {
-	ID        string                 `json:"id"`
-	StartTime string                 `json:"start_time"`
-	EndTime   string                 `json:"end_time,omitempty"`
-	Status    string                 `json:"status"`
-	Results   map[string]interface{} `json:"results"`
+	ID        string         `json:"id"`
+	StartTime string         `json:"start_time"`
+	EndTime   string         `json:"end_time,omitempty"`
+	Status    string         `json:"status"`
+	Results   map[string]any `json:"results"`
 }

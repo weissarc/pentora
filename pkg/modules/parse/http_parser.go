@@ -140,7 +140,7 @@ func (m *HTTPParserModule) Metadata() engine.ModuleMetadata {
 }
 
 // Init initializes the module with its instance ID and configuration.
-func (m *HTTPParserModule) Init(instanceID string, configMap map[string]interface{}) error {
+func (m *HTTPParserModule) Init(instanceID string, configMap map[string]any) error {
 	m.meta.ID = instanceID
 	// cfg := m.config // Start with defaults
 	logger := log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
@@ -160,7 +160,7 @@ var serverRegex = regexp.MustCompile(`^([a-zA-Z0-9._-]+)(?:/([0-9a-zA-Z._-]+))?(
 // Execute parses HTTP banners.
 //
 //nolint:gocyclo // Complexity is inherent to HTTP response parsing logic
-func (m *HTTPParserModule) Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- engine.ModuleOutput) error {
+func (m *HTTPParserModule) Execute(ctx context.Context, inputs map[string]any, outputChan chan<- engine.ModuleOutput) error {
 	logger := log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
 	logger.Debug().Interface("received_inputs", inputs).Msg("Executing module")
 
@@ -173,7 +173,7 @@ func (m *HTTPParserModule) Execute(ctx context.Context, inputs map[string]interf
 		return nil // Not an error, just no relevant input
 	}
 
-	bannerList, listOk := rawBannerInput.([]interface{})
+	bannerList, listOk := rawBannerInput.([]any)
 	if !listOk {
 		if typed, ok := rawBannerInput.([]scan.BannerGrabResult); ok {
 			for _, item := range typed {
@@ -506,11 +506,11 @@ func parseHSTS(value string) *HSTSInfo {
 	hsts := &HSTSInfo{Present: true}
 
 	// Parse directives: max-age=31536000; includeSubDomains; preload
-	parts := strings.Split(value, ";")
-	for _, part := range parts {
+	parts := strings.SplitSeq(value, ";")
+	for part := range parts {
 		part = strings.TrimSpace(part)
-		if strings.HasPrefix(part, "max-age=") {
-			maxAgeStr := strings.TrimPrefix(part, "max-age=")
+		if after, ok := strings.CutPrefix(part, "max-age="); ok {
+			maxAgeStr := after
 			if maxAge, err := strconv.Atoi(maxAgeStr); err == nil {
 				hsts.MaxAge = maxAge
 			}
@@ -532,8 +532,8 @@ func parseCSP(value string) *CSPInfo {
 	}
 
 	// Parse directives: default-src 'self'; script-src 'unsafe-inline'; ...
-	directives := strings.Split(value, ";")
-	for _, directive := range directives {
+	directives := strings.SplitSeq(value, ";")
+	for directive := range directives {
 		directive = strings.TrimSpace(directive)
 		if directive == "" {
 			continue

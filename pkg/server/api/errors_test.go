@@ -169,7 +169,7 @@ func TestWriteJSONError(t *testing.T) {
 func TestWriteJSON_Success(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"id":     "scan-1",
 		"status": "completed",
 	}
@@ -179,7 +179,7 @@ func TestWriteJSON_Success(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Equal(t, "application/json", w.Header().Get("Content-Type"))
 
-	var response map[string]interface{}
+	var response map[string]any
 	err := json.NewDecoder(w.Body).Decode(&response)
 	require.NoError(t, err)
 	require.Equal(t, "scan-1", response["id"])
@@ -212,7 +212,7 @@ func TestWriteJSON_EncodingError(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// Channels are not JSON-encodable
-	data := map[string]interface{}{
+	data := map[string]any{
 		"channel": make(chan int),
 	}
 

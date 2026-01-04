@@ -64,10 +64,10 @@ type OutputEvent struct {
 	Message string
 
 	// Data contains structured data (e.g., table headers/rows, progress values)
-	Data interface{}
+	Data any
 
 	// Metadata holds additional key-value pairs for diagnostic events
-	Metadata map[string]interface{}
+	Metadata map[string]any
 
 	// Timestamp records when the event was created
 	Timestamp time.Time
@@ -99,5 +99,5 @@ type Output interface {
 
 	// Diag emits diagnostic information (only visible with -v/-vv/-vvv).
 	// Example: out.Diag(LevelVerbose, "Cache hit", map[string]interface{}{"key": "abc"})
-	Diag(level OutputLevel, message string, metadata map[string]interface{})
+	Diag(level OutputLevel, message string, metadata map[string]any)
 }

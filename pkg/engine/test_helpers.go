@@ -12,10 +12,10 @@ func (m *dagMockModule) Metadata() ModuleMetadata {
 	return m.meta
 }
 
-func (m *dagMockModule) Init(instanceID string, moduleConfig map[string]interface{}) error {
+func (m *dagMockModule) Init(instanceID string, moduleConfig map[string]any) error {
 	return nil
 }
 
-func (m *dagMockModule) Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- ModuleOutput) error {
+func (m *dagMockModule) Execute(ctx context.Context, inputs map[string]any, outputChan chan<- ModuleOutput) error {
 	return nil
 }

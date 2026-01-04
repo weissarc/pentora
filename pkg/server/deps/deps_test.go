@@ -64,7 +64,7 @@ func TestDeps_ReadyThreadSafe(t *testing.T) {
 
 	// Test concurrent access to ready state
 	done := make(chan bool)
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		go func() {
 			deps.SetReady()
 			deps.SetNotReady()
@@ -74,7 +74,7 @@ func TestDeps_ReadyThreadSafe(t *testing.T) {
 	}
 
 	// Wait for all goroutines
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		<-done
 	}
 

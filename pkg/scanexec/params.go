@@ -16,7 +16,7 @@ type Params struct {
 	Concurrency   int
 	WorkspaceDir  string
 	OutputFormat  string
-	RawInputs     map[string]interface{}
+	RawInputs     map[string]any
 	OnlyDiscover  bool
 	SkipDiscover  bool
 }
@@ -27,6 +27,6 @@ type Result struct {
 	StartTime  string
 	EndTime    string
 	Status     string
-	Findings   interface{}
-	RawContext map[string]interface{}
+	Findings   any
+	RawContext map[string]any
 }

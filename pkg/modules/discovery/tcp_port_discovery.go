@@ -139,7 +139,7 @@ func (m *TCPPortDiscoveryModule) Metadata() engine.ModuleMetadata {
 
 // Init initializes the module with the given configuration map.
 // It parses the map and populates the module's config struct, overriding defaults.
-func (m *TCPPortDiscoveryModule) Init(instanceID string, moduleConfig map[string]interface{}) error {
+func (m *TCPPortDiscoveryModule) Init(instanceID string, moduleConfig map[string]any) error {
 	cfg := m.config // Start with default config values
 
 	m.meta.ID = instanceID // Set the unique ID for this module instance
@@ -187,7 +187,7 @@ func (m *TCPPortDiscoveryModule) Init(instanceID string, moduleConfig map[string
 // Execute performs the TCP port discovery.
 //
 //nolint:gocyclo // Complexity inherited from existing implementation
-func (m *TCPPortDiscoveryModule) Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- engine.ModuleOutput) error {
+func (m *TCPPortDiscoveryModule) Execute(ctx context.Context, inputs map[string]any, outputChan chan<- engine.ModuleOutput) error {
 	var targetsToScan []string
 
 	logger := log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
@@ -250,10 +250,7 @@ func (m *TCPPortDiscoveryModule) Execute(ctx context.Context, inputs map[string]
 
 	batchSize := 10 // Gruplama büyüklüğü
 	for i := 0; i < len(targetsToScan); i += batchSize {
-		end := i + batchSize
-		if end > len(targetsToScan) {
-			end = len(targetsToScan)
-		}
+		end := min(i+batchSize, len(targetsToScan))
 		ipBatch := targetsToScan[i:end]
 
 		logger.Debug().Msgf("Scanning IP batch: %v", ipBatch)

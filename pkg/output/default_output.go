@@ -54,7 +54,7 @@ func (o *DefaultOutput) Table(headers []string, rows [][]string) {
 	o.stream.Emit(OutputEvent{
 		Type:  EventTable,
 		Level: LevelNormal,
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"headers": headers,
 			"rows":    rows,
 		},
@@ -68,7 +68,7 @@ func (o *DefaultOutput) Progress(current, total int, message string) {
 		Type:    EventProgress,
 		Level:   LevelNormal,
 		Message: message,
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"current": current,
 			"total":   total,
 		},
@@ -77,7 +77,7 @@ func (o *DefaultOutput) Progress(current, total int, message string) {
 }
 
 // Diag emits diagnostic information (only visible with -v/-vv/-vvv).
-func (o *DefaultOutput) Diag(level OutputLevel, message string, metadata map[string]interface{}) {
+func (o *DefaultOutput) Diag(level OutputLevel, message string, metadata map[string]any) {
 	o.stream.Emit(OutputEvent{
 		Type:      EventDiag,
 		Level:     level,

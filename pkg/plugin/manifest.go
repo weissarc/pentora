@@ -41,7 +41,7 @@ type ManifestEntry struct {
 	Checksum     string    `json:"checksum"`
 	DownloadURL  string    `json:"download_url"`
 	InstalledAt  time.Time `json:"installed_at"`
-	LastVerified time.Time `json:"last_verified,omitempty"`
+	LastVerified time.Time `json:"last_verified,omitzero"`
 
 	// File path (relative to plugin directory)
 	Path string `json:"path"`

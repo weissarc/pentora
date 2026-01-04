@@ -137,7 +137,7 @@ func (m *ICMPPingDiscoveryModule) Metadata() engine.ModuleMetadata {
 
 // Init initializes the module with the given configuration map.
 // It parses the map and populates the module's config struct, overriding defaults.
-func (m *ICMPPingDiscoveryModule) Init(instanceID string, configMap map[string]interface{}) error {
+func (m *ICMPPingDiscoveryModule) Init(instanceID string, configMap map[string]any) error {
 	// Start with default config values already set by newICMPPingDiscoveryModule
 	cfg := m.config
 
@@ -220,7 +220,7 @@ func (m *ICMPPingDiscoveryModule) Init(instanceID string, configMap map[string]i
 // Execute performs the host discovery using ICMP pings based on the initialized configuration.
 //
 //nolint:gocyclo // Complexity inherited from existing implementation (target resolution, timeout handling, context management)
-func (m *ICMPPingDiscoveryModule) Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- engine.ModuleOutput) error {
+func (m *ICMPPingDiscoveryModule) Execute(ctx context.Context, inputs map[string]any, outputChan chan<- engine.ModuleOutput) error {
 	logger := log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
 	logger.Debug().Interface("received_inputs", inputs).Msg("Executing module")
 

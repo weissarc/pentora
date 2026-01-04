@@ -4,6 +4,7 @@ package engine
 
 import (
 	"fmt"
+	"maps"
 )
 
 // ModuleFactory is a function that creates an instance of a module.
@@ -25,7 +26,7 @@ func RegisterModuleFactory(name string, factory ModuleFactory) {
 
 // GetModuleInstance creates a new instance of a module given its registered name
 // and initializes it with the provided configuration.
-func GetModuleInstance(instanceID, name string, config map[string]interface{}) (Module, error) {
+func GetModuleInstance(instanceID, name string, config map[string]any) (Module, error) {
 	factory, ok := moduleRegistry[name]
 	if !ok {
 		return nil, fmt.Errorf("no module factory registered for name: %s", name)
@@ -48,9 +49,7 @@ func GetRegisteredModuleFactories() map[string]ModuleFactory {
 	// Create a copy to prevent external modification of the registry map itself.
 	// The factories themselves are still references, but the map is new.
 	registryCopy := make(map[string]ModuleFactory, len(moduleRegistry))
-	for name, factory := range moduleRegistry {
-		registryCopy[name] = factory
-	}
+	maps.Copy(registryCopy, moduleRegistry)
 	return registryCopy
 }
 

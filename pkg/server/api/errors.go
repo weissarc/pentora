@@ -179,7 +179,7 @@ func WriteJSONError(w http.ResponseWriter, statusCode int, errorType, errorCode,
 
 // WriteJSON writes a JSON response to the client.
 // Use this for successful API responses.
-func WriteJSON(w http.ResponseWriter, statusCode int, data interface{}) {
+func WriteJSON(w http.ResponseWriter, statusCode int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 

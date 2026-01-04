@@ -7,6 +7,8 @@ package plugin
 // Shared constants for plugin validation across CLI, API, and Service layers.
 // These constants ensure consistent validation logic in defense-in-depth approach.
 
+import "slices"
+
 // ValidSources defines the allowed plugin source names.
 // These are the officially supported plugin repositories.
 var ValidSources = []string{
@@ -30,12 +32,7 @@ const MaxRequestBodySize = 2 << 20 // 2 MB
 //	    return fmt.Errorf("invalid source")
 //	}
 func IsValidSource(source string) bool {
-	for _, valid := range ValidSources {
-		if source == valid {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(ValidSources, source)
 }
 
 // IsValidCategory checks if a category is valid.

@@ -27,11 +27,11 @@ type TLSObservation struct {
 	ServerName     string    `json:"server_name,omitempty" yaml:"server_name,omitempty"`
 	PeerCommonName string    `json:"peer_common_name,omitempty" yaml:"peer_common_name,omitempty"`
 	PeerDNSNames   []string  `json:"peer_dns_names,omitempty" yaml:"peer_dns_names,omitempty"`
-	Issuer         string    `json:"issuer,omitempty" yaml:"issuer,omitempty"`         // Phase 1.7: Certificate issuer DN
-	NotBefore      time.Time `json:"not_before,omitempty" yaml:"not_before,omitempty"` // Phase 1.7: Certificate validity start
-	NotAfter       time.Time `json:"not_after,omitempty" yaml:"not_after,omitempty"`   // Phase 1.7: Certificate validity end
-	IsExpired      bool      `json:"is_expired" yaml:"is_expired"`                     // Phase 1.7: True if cert expired
-	IsSelfSigned   bool      `json:"is_self_signed" yaml:"is_self_signed"`             // Phase 1.7: True if Subject == Issuer
+	Issuer         string    `json:"issuer,omitempty" yaml:"issuer,omitempty"`        // Phase 1.7: Certificate issuer DN
+	NotBefore      time.Time `json:"not_before,omitzero" yaml:"not_before,omitempty"` // Phase 1.7: Certificate validity start
+	NotAfter       time.Time `json:"not_after,omitzero" yaml:"not_after,omitempty"`   // Phase 1.7: Certificate validity end
+	IsExpired      bool      `json:"is_expired" yaml:"is_expired"`                    // Phase 1.7: True if cert expired
+	IsSelfSigned   bool      `json:"is_self_signed" yaml:"is_self_signed"`            // Phase 1.7: True if Subject == Issuer
 }
 
 // FindingSeverity defines the severity of a finding.
@@ -60,13 +60,13 @@ type VulnerabilityFinding struct {
 
 // ServiceDetails contains information about the service running on a port.
 type ServiceDetails struct {
-	Name             string                 `json:"name,omitempty" yaml:"name,omitempty"`             // e.g., SSH, HTTP
-	Product          string                 `json:"product,omitempty" yaml:"product,omitempty"`       // e.g., OpenSSH, Nginx (parser'dan gelen daha spesifik ürün adı)
-	Version          string                 `json:"version,omitempty" yaml:"version,omitempty"`       // e.g., 8.2p1, 1.22.1
-	RawBanner        string                 `json:"raw_banner,omitempty" yaml:"raw_banner,omitempty"` // Raw banner captured
-	IsTLS            bool                   `json:"is_tls,omitempty" yaml:"is_tls,omitempty"`
-	ParsedAttributes map[string]interface{} `json:"parsed_attributes,omitempty" yaml:"parsed_attributes,omitempty"` // HTTP headers, SSH specific details, etc.
-	Evidence         []ProbeObservation     `json:"evidence,omitempty" yaml:"evidence,omitempty"`                   // Active probe results from Phase 1.5 (Probe Fallback)
+	Name             string             `json:"name,omitempty" yaml:"name,omitempty"`             // e.g., SSH, HTTP
+	Product          string             `json:"product,omitempty" yaml:"product,omitempty"`       // e.g., OpenSSH, Nginx (parser'dan gelen daha spesifik ürün adı)
+	Version          string             `json:"version,omitempty" yaml:"version,omitempty"`       // e.g., 8.2p1, 1.22.1
+	RawBanner        string             `json:"raw_banner,omitempty" yaml:"raw_banner,omitempty"` // Raw banner captured
+	IsTLS            bool               `json:"is_tls,omitempty" yaml:"is_tls,omitempty"`
+	ParsedAttributes map[string]any     `json:"parsed_attributes,omitempty" yaml:"parsed_attributes,omitempty"` // HTTP headers, SSH specific details, etc.
+	Evidence         []ProbeObservation `json:"evidence,omitempty" yaml:"evidence,omitempty"`                   // Active probe results from Phase 1.5 (Probe Fallback)
 }
 
 // PortProfile details information about a specific open port on a target.
@@ -74,7 +74,7 @@ type PortProfile struct {
 	PortNumber      int                    `json:"port_number" yaml:"port_number"`
 	Protocol        string                 `json:"protocol" yaml:"protocol"` // "tcp", "udp"
 	Status          string                 `json:"status" yaml:"status"`     // "open", "filtered", "closed"
-	Service         ServiceDetails         `json:"service,omitempty" yaml:"service,omitempty"`
+	Service         ServiceDetails         `json:"service,omitzero" yaml:"service,omitempty"`
 	Vulnerabilities []VulnerabilityFinding `json:"vulnerabilities,omitempty" yaml:"vulnerabilities,omitempty"`
 }
 
@@ -84,7 +84,7 @@ type AssetProfile struct {
 	ResolvedIPs          map[string]time.Time     `json:"resolved_ips,omitempty" yaml:"resolved_ips,omitempty"` // Map of IP to first_seen_alive_time
 	Hostnames            []string                 `json:"hostnames,omitempty" yaml:"hostnames,omitempty"`
 	IsAlive              bool                     `json:"is_alive" yaml:"is_alive"` // If any IP resolved from target is alive
-	FirstSeenAlive       time.Time                `json:"first_seen_alive,omitempty" yaml:"first_seen_alive,omitempty"`
+	FirstSeenAlive       time.Time                `json:"first_seen_alive,omitzero" yaml:"first_seen_alive,omitempty"`
 	LastObservationTime  time.Time                `json:"last_observation_time" yaml:"last_observation_time"`           // When data for this asset was last updated
 	OpenPorts            map[string][]PortProfile `json:"open_ports_by_ip,omitempty" yaml:"open_ports_by_ip,omitempty"` // Keyed by IP address
 	TotalVulnerabilities int                      `json:"total_vulnerabilities" yaml:"total_vulnerabilities"`

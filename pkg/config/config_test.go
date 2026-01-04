@@ -159,8 +159,8 @@ func TestManager_Load_UnmarshalError(t *testing.T) {
 
 	// Load with a value that cannot be converted to the target type
 	// Put a string where an int is expected (server.port)
-	testData := map[string]interface{}{
-		"server": map[string]interface{}{
+	testData := map[string]any{
+		"server": map[string]any{
 			"port": "not-a-valid-port-number-at-all", // String that can't parse to int
 		},
 	}

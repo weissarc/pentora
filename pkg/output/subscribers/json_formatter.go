@@ -44,7 +44,7 @@ func (s *JSONFormatter) ShouldHandle(event output.OutputEvent) bool {
 // Handle processes an output event and renders it as JSON.
 func (s *JSONFormatter) Handle(event output.OutputEvent) {
 	// Convert event to JSON-friendly structure
-	jsonEvent := map[string]interface{}{
+	jsonEvent := map[string]any{
 		"type":      event.Type,
 		"timestamp": event.Timestamp.Format(time.RFC3339),
 	}

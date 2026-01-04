@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
 	"sync"
 	"time"
@@ -21,7 +22,7 @@ type dataKeySchema struct {
 type DataContext struct {
 	mu     sync.RWMutex
 	schema map[string]dataKeySchema
-	data   map[string]interface{}
+	data   map[string]any
 }
 
 // Expose RLock/RUnlock to satisfy legacy tests expecting embedded RWMutex methods.
@@ -31,7 +32,7 @@ func (dc *DataContext) RUnlock() { dc.mu.RUnlock() }
 func NewDataContext() *DataContext {
 	return &DataContext{
 		schema: make(map[string]dataKeySchema),
-		data:   make(map[string]interface{}),
+		data:   make(map[string]any),
 	}
 }
 
@@ -43,29 +44,29 @@ func NewDataContext() *DataContext {
 // register their own schemas using RegisterType() with concrete types.
 func RegisterCommonSchema(dc *DataContext) {
 	// Config keys (CardinalitySingle)
-	_ = dc.RegisterType("config.targets", reflect.TypeOf([]string{}), CardinalitySingle)
-	_ = dc.RegisterType("config.ports", reflect.TypeOf([]int{}), CardinalitySingle)
+	_ = dc.RegisterType("config.targets", reflect.TypeFor[[]string](), CardinalitySingle)
+	_ = dc.RegisterType("config.ports", reflect.TypeFor[[]int](), CardinalitySingle)
 
 	// Simple parse keys (CardinalityList) - primitive types
 	// Note: For CardinalityList, register slice types ([]T) not element types (T)
-	_ = dc.RegisterType("ssh.banner", reflect.TypeOf([]string{}), CardinalityList)
-	_ = dc.RegisterType("ssh.version", reflect.TypeOf([]string{}), CardinalityList)
-	_ = dc.RegisterType("http.server", reflect.TypeOf([]string{}), CardinalityList)
-	_ = dc.RegisterType("service.port", reflect.TypeOf([]int{}), CardinalityList)
+	_ = dc.RegisterType("ssh.banner", reflect.TypeFor[[]string](), CardinalityList)
+	_ = dc.RegisterType("ssh.version", reflect.TypeFor[[]string](), CardinalityList)
+	_ = dc.RegisterType("http.server", reflect.TypeFor[[]string](), CardinalityList)
+	_ = dc.RegisterType("service.port", reflect.TypeFor[[]int](), CardinalityList)
 
 	// Phase 1.8: TLS protocol-level keys (CardinalityList)
-	_ = dc.RegisterType("tls.version", reflect.TypeOf([]string{}), CardinalityList)
-	_ = dc.RegisterType("tls.cipher_suite", reflect.TypeOf([]string{}), CardinalityList)
-	_ = dc.RegisterType("tls.server_name", reflect.TypeOf([]string{}), CardinalityList)
+	_ = dc.RegisterType("tls.version", reflect.TypeFor[[]string](), CardinalityList)
+	_ = dc.RegisterType("tls.cipher_suite", reflect.TypeFor[[]string](), CardinalityList)
+	_ = dc.RegisterType("tls.server_name", reflect.TypeFor[[]string](), CardinalityList)
 
 	// Phase 1.8: TLS certificate-level keys (CardinalityList)
-	_ = dc.RegisterType("tls.certificate.issuer", reflect.TypeOf([]string{}), CardinalityList)
-	_ = dc.RegisterType("tls.certificate.common_name", reflect.TypeOf([]string{}), CardinalityList)
-	_ = dc.RegisterType("tls.certificate.dns_names", reflect.TypeOf([]string{}), CardinalityList)
-	_ = dc.RegisterType("tls.certificate.not_before", reflect.TypeOf([]time.Time{}), CardinalityList)
-	_ = dc.RegisterType("tls.certificate.not_after", reflect.TypeOf([]time.Time{}), CardinalityList)
-	_ = dc.RegisterType("tls.certificate.is_expired", reflect.TypeOf([]bool{}), CardinalityList)
-	_ = dc.RegisterType("tls.certificate.is_self_signed", reflect.TypeOf([]bool{}), CardinalityList)
+	_ = dc.RegisterType("tls.certificate.issuer", reflect.TypeFor[[]string](), CardinalityList)
+	_ = dc.RegisterType("tls.certificate.common_name", reflect.TypeFor[[]string](), CardinalityList)
+	_ = dc.RegisterType("tls.certificate.dns_names", reflect.TypeFor[[]string](), CardinalityList)
+	_ = dc.RegisterType("tls.certificate.not_before", reflect.TypeFor[[]time.Time](), CardinalityList)
+	_ = dc.RegisterType("tls.certificate.not_after", reflect.TypeFor[[]time.Time](), CardinalityList)
+	_ = dc.RegisterType("tls.certificate.is_expired", reflect.TypeFor[[]bool](), CardinalityList)
+	_ = dc.RegisterType("tls.certificate.is_self_signed", reflect.TypeFor[[]bool](), CardinalityList)
 
 	// Complex types deferred to modules to avoid import cycles:
 	// - discovery.live_hosts (discovery.ICMPPingDiscoveryResult)
@@ -85,32 +86,32 @@ func RegisterCommonSchema(dc *DataContext) {
 
 // SetInitial stores an initial input value directly, overwriting if exists.
 // Note: Does not validate against schema; reserved for bootstrap paths.
-func (dc *DataContext) SetInitial(key string, value interface{}) {
+func (dc *DataContext) SetInitial(key string, value any) {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 	dc.data[key] = value
 }
 
 // AddOrAppendToList appends to a list value, promoting existing non-list to list when necessary.
-func (dc *DataContext) AddOrAppendToList(key string, value interface{}) {
+func (dc *DataContext) AddOrAppendToList(key string, value any) {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 	if existing, ok := dc.data[key]; ok {
-		if list, ok := existing.([]interface{}); ok {
+		if list, ok := existing.([]any); ok {
 			dc.data[key] = append(list, value)
 		} else {
-			dc.data[key] = []interface{}{existing, value}
+			dc.data[key] = []any{existing, value}
 		}
 	} else {
-		dc.data[key] = []interface{}{value}
+		dc.data[key] = []any{value}
 	}
 }
 
 // Set is a legacy alias for AddOrAppendToList, preserved for tests.
-func (dc *DataContext) Set(key string, value interface{}) { dc.AddOrAppendToList(key, value) }
+func (dc *DataContext) Set(key string, value any) { dc.AddOrAppendToList(key, value) }
 
 // Get returns untyped value and found flag (legacy accessor).
-func (dc *DataContext) Get(key string) (interface{}, bool) {
+func (dc *DataContext) Get(key string) (any, bool) {
 	dc.mu.RLock()
 	defer dc.mu.RUnlock()
 	v, ok := dc.data[key]
@@ -118,13 +119,11 @@ func (dc *DataContext) Get(key string) (interface{}, bool) {
 }
 
 // GetAll returns a shallow copy of the internal map (legacy accessor).
-func (dc *DataContext) GetAll() map[string]interface{} {
+func (dc *DataContext) GetAll() map[string]any {
 	dc.mu.RLock()
 	defer dc.mu.RUnlock()
-	out := make(map[string]interface{}, len(dc.data))
-	for k, v := range dc.data {
-		out[k] = v
-	}
+	out := make(map[string]any, len(dc.data))
+	maps.Copy(out, dc.data)
 	return out
 }
 
@@ -141,7 +140,7 @@ func (dc *DataContext) RegisterType(key string, typ reflect.Type, card Cardinali
 }
 
 // PublishValue sets the entire value for a key (CardinalitySingle) with runtime validation.
-func (dc *DataContext) PublishValue(key string, value interface{}) error {
+func (dc *DataContext) PublishValue(key string, value any) error {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 	sch, ok := dc.schema[key]
@@ -159,7 +158,7 @@ func (dc *DataContext) PublishValue(key string, value interface{}) error {
 }
 
 // AppendValue adds a single item for list cardinality keys. The stored value becomes a slice.
-func (dc *DataContext) AppendValue(key string, item interface{}) error {
+func (dc *DataContext) AppendValue(key string, item any) error {
 	dc.mu.Lock()
 	defer dc.mu.Unlock()
 	sch, ok := dc.schema[key]
@@ -199,7 +198,7 @@ func (dc *DataContext) AppendValue(key string, item interface{}) error {
 }
 
 // GetValue returns the stored value for a key with validation against schema type.
-func (dc *DataContext) GetValue(key string) (interface{}, error) {
+func (dc *DataContext) GetValue(key string) (any, error) {
 	dc.mu.RLock()
 	defer dc.mu.RUnlock()
 	sch, ok := dc.schema[key]
@@ -217,7 +216,7 @@ func (dc *DataContext) GetValue(key string) (interface{}, error) {
 	return v, nil
 }
 
-func (dc *DataContext) checkTypeLocked(sch dataKeySchema, v interface{}) error {
+func (dc *DataContext) checkTypeLocked(sch dataKeySchema, v any) error {
 	vt := reflect.TypeOf(v)
 	if vt == nil { // allow nil set only if expected is a pointer/interface
 		if sch.typ.Kind() != reflect.Interface && sch.typ.Kind() != reflect.Pointer && sch.typ.Kind() != reflect.Slice && sch.typ.Kind() != reflect.Map {
@@ -238,7 +237,7 @@ func Register[T any](dc *DataContext, key string, card Cardinality) error {
 	var zero T
 	t := reflect.TypeOf(zero)
 	if t == nil {
-		t = reflect.TypeOf((*T)(nil)).Elem()
+		t = reflect.TypeFor[T]()
 	}
 	return dc.RegisterType(key, t, card)
 }

@@ -2,6 +2,8 @@ package engine
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -52,7 +54,7 @@ type DAGSchema struct {
 
 	// Metadata contains optional user-defined metadata.
 	// Common fields: author, created, tags, etc.
-	Metadata map[string]interface{} `yaml:"metadata,omitempty" json:"metadata,omitempty"`
+	Metadata map[string]any `yaml:"metadata,omitempty" json:"metadata,omitempty"`
 }
 
 // DAGNode represents a single node in the DAG (a module instance).
@@ -87,7 +89,7 @@ type DAGNode struct {
 
 	// Config is node-specific configuration passed to the module.
 	// Structure depends on the module's requirements.
-	Config map[string]interface{} `yaml:"config,omitempty" json:"config,omitempty"`
+	Config map[string]any `yaml:"config,omitempty" json:"config,omitempty"`
 }
 
 // Validate performs comprehensive validation on the DAG definition.
@@ -286,11 +288,8 @@ func (d *DAGSchema) validateDataFlow(nodeIndex map[string]*DAGNode, result *Vali
 
 			for _, depID := range allDeps {
 				dep := nodeIndex[depID]
-				for _, producedKey := range dep.Produces {
-					if producedKey == consumedKey {
-						producedByDep = true
-						break
-					}
+				if slices.Contains(dep.Produces, consumedKey) {
+					producedByDep = true
 				}
 				if producedByDep {
 					break
@@ -501,14 +500,12 @@ func (d *DAGSchema) ToDAGDefinition() (*DAGDefinition, error) {
 	nodes := make([]DAGNodeConfig, 0, len(d.Nodes))
 	for _, node := range d.Nodes {
 		// Make a copy of the config to avoid modifying the original
-		var config map[string]interface{}
+		var config map[string]any
 		if node.Config != nil {
-			config = make(map[string]interface{}, len(node.Config))
-			for k, v := range node.Config {
-				config[k] = v
-			}
+			config = make(map[string]any, len(node.Config))
+			maps.Copy(config, node.Config)
 		} else {
-			config = make(map[string]interface{})
+			config = make(map[string]any)
 		}
 
 		nodeConfig := DAGNodeConfig{
@@ -520,7 +517,7 @@ func (d *DAGSchema) ToDAGDefinition() (*DAGDefinition, error) {
 		// Store explicit dependencies in config for orchestrator to use
 		// Convert []string to []interface{} for consistent type handling
 		if len(node.DependsOn) > 0 {
-			depends := make([]interface{}, len(node.DependsOn))
+			depends := make([]any, len(node.DependsOn))
 			for i, dep := range node.DependsOn {
 				depends[i] = dep
 			}
@@ -529,14 +526,14 @@ func (d *DAGSchema) ToDAGDefinition() (*DAGDefinition, error) {
 
 		// Store explicit consumes/produces for validation
 		if len(node.Consumes) > 0 {
-			consumes := make([]interface{}, len(node.Consumes))
+			consumes := make([]any, len(node.Consumes))
 			for i, c := range node.Consumes {
 				consumes[i] = c
 			}
 			nodeConfig.Config["__consumes"] = consumes
 		}
 		if len(node.Produces) > 0 {
-			produces := make([]interface{}, len(node.Produces))
+			produces := make([]any, len(node.Produces))
 			for i, p := range node.Produces {
 				produces[i] = p
 			}

@@ -181,7 +181,7 @@ func (m *PluginEvaluationModule) Metadata() engine.ModuleMetadata {
 }
 
 // Init initializes the plugin evaluation module and loads embedded plugins.
-func (m *PluginEvaluationModule) Init(instanceID string, config map[string]interface{}) error {
+func (m *PluginEvaluationModule) Init(instanceID string, config map[string]any) error {
 	m.meta.ID = instanceID
 	logger := log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
 
@@ -217,7 +217,7 @@ func (m *PluginEvaluationModule) Init(instanceID string, config map[string]inter
 }
 
 // Execute runs the plugin evaluation against the scan context.
-func (m *PluginEvaluationModule) Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- engine.ModuleOutput) error {
+func (m *PluginEvaluationModule) Execute(ctx context.Context, inputs map[string]any, outputChan chan<- engine.ModuleOutput) error {
 	logger := log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
 	logger.Info().Msg("Plugin evaluation module execution started")
 
@@ -316,7 +316,7 @@ func (m *PluginEvaluationModule) Execute(ctx context.Context, inputs map[string]
 // buildEvaluationContext builds a map[string]any from module inputs for plugin evaluation.
 //
 //nolint:gocyclo // Complexity is inherent to data handling logic
-func (m *PluginEvaluationModule) buildEvaluationContext(inputs map[string]interface{}) map[string]any {
+func (m *PluginEvaluationModule) buildEvaluationContext(inputs map[string]any) map[string]any {
 	context := make(map[string]any)
 
 	// Extract all known input keys
@@ -351,7 +351,7 @@ func (m *PluginEvaluationModule) buildEvaluationContext(inputs map[string]interf
 		if value, ok := inputs[key]; ok && value != nil {
 			// Handle array inputs - plugins expect single values, not arrays
 			// DataContext stores outputs as []interface{}, we need to extract first element
-			if arr, isArray := value.([]interface{}); isArray && len(arr) > 0 {
+			if arr, isArray := value.([]any); isArray && len(arr) > 0 {
 				context[key] = arr[0] // Take first element for plugin evaluation
 				logger.Debug().Str("key", key).Interface("value", arr[0]).Msg("Added to evaluation context (from array)")
 			} else {
@@ -363,12 +363,12 @@ func (m *PluginEvaluationModule) buildEvaluationContext(inputs map[string]interf
 
 	// Extract target and port from service details (SSH, HTTP, etc.)
 	// This provides context for vulnerability reporting
-	if sshDetails, ok := inputs["service.ssh.details"].([]interface{}); ok && len(sshDetails) > 0 {
+	if sshDetails, ok := inputs["service.ssh.details"].([]any); ok && len(sshDetails) > 0 {
 		// Try parse.SSHParsedInfo struct first (direct type)
 		if sshInfo, ok := sshDetails[0].(parse.SSHParsedInfo); ok {
 			context["target"] = sshInfo.Target
 			context["service.port"] = sshInfo.Port
-		} else if sshInfo, ok := sshDetails[0].(map[string]interface{}); ok {
+		} else if sshInfo, ok := sshDetails[0].(map[string]any); ok {
 			// Fallback to map (in case of JSON unmarshaling)
 			if target, ok := sshInfo["target"].(string); ok {
 				context["target"] = target
@@ -383,12 +383,12 @@ func (m *PluginEvaluationModule) buildEvaluationContext(inputs map[string]interf
 
 	// Extract target from banner grab results if not found in service details
 	if _, hasTarget := context["target"]; !hasTarget {
-		if banners, ok := inputs["service.banner.tcp"].([]interface{}); ok && len(banners) > 0 {
+		if banners, ok := inputs["service.banner.tcp"].([]any); ok && len(banners) > 0 {
 			// Try scan.BannerGrabResult struct first (direct type)
 			if banner, ok := banners[0].(scan.BannerGrabResult); ok {
 				context["target"] = banner.IP
 				context["service.port"] = banner.Port
-			} else if banner, ok := banners[0].(map[string]interface{}); ok {
+			} else if banner, ok := banners[0].(map[string]any); ok {
 				// Fallback to map (in case of JSON unmarshaling)
 				if ip, ok := banner["ip"].(string); ok {
 					context["target"] = ip

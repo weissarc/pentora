@@ -4,10 +4,10 @@ package fingerprint
 // or fetched externally. The structure is intentionally flexible so future signals
 // (TLS SNI, JA3, HTTP headers, etc.) can be added without breaking compatibility.
 type Catalog struct {
-	Source       string                 `yaml:"source" json:"source"` // e.g. builtin, community, enterprise
-	Version      string                 `yaml:"version" json:"version"`
-	Fingerprints []Metadata             `yaml:"fingerprints" json:"fingerprints"`
-	Metadata     map[string]interface{} `yaml:"metadata,omitempty" json:"metadata,omitempty"`
+	Source       string         `yaml:"source" json:"source"` // e.g. builtin, community, enterprise
+	Version      string         `yaml:"version" json:"version"`
+	Fingerprints []Metadata     `yaml:"fingerprints" json:"fingerprints"`
+	Metadata     map[string]any `yaml:"metadata,omitempty" json:"metadata,omitempty"`
 }
 
 // Metadata describes how to recognize a specific service/product.

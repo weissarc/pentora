@@ -4,6 +4,8 @@
 
 package plugin
 
+import "slices"
+
 // Category represents a plugin category for organization and filtering.
 type Category string
 
@@ -40,12 +42,7 @@ func (c Category) String() string {
 
 // IsValid checks if the category is a valid standard category.
 func (c Category) IsValid() bool {
-	for _, cat := range AllCategories() {
-		if c == cat {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(AllCategories(), c)
 }
 
 // CategoryFromString converts a string to a Category.

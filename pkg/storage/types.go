@@ -34,7 +34,7 @@ type ScanMetadata struct {
 
 	// CompletedAt is when the scan finished (UTC).
 	// Zero value if scan is still running.
-	CompletedAt time.Time `json:"completed_at,omitempty"`
+	CompletedAt time.Time `json:"completed_at,omitzero"`
 
 	// Duration is the scan duration in seconds.
 	// Only set when scan is completed.

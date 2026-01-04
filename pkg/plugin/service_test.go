@@ -1906,7 +1906,7 @@ func BenchmarkService_List(b *testing.B) {
 
 	// Create manifest with 100 plugins
 	entries := make([]*ManifestEntry, 100)
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		entries[i] = &ManifestEntry{
 			ID:      fmt.Sprintf("plugin-%d", i),
 			Name:    fmt.Sprintf("Plugin %d", i),
@@ -1924,8 +1924,7 @@ func BenchmarkService_List(b *testing.B) {
 
 	svc := newTestService(&mockCacheManager{}, manifest, &mockDownloader{}, []PluginSource{})
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = svc.List(ctx)
 	}
 }
@@ -1935,7 +1934,7 @@ func BenchmarkService_GetInfo(b *testing.B) {
 
 	// Create manifest with 100 plugins
 	entries := make([]*ManifestEntry, 100)
-	for i := 0; i < 100; i++ {
+	for i := range 100 {
 		entries[i] = &ManifestEntry{
 			ID:      fmt.Sprintf("plugin-%d", i),
 			Name:    fmt.Sprintf("Plugin %d", i),
@@ -1954,8 +1953,7 @@ func BenchmarkService_GetInfo(b *testing.B) {
 
 	svc := newTestService(&mockCacheManager{}, manifest, &mockDownloader{}, []PluginSource{})
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = svc.GetInfo(ctx, "plugin-50")
 	}
 }
@@ -2007,8 +2005,7 @@ func BenchmarkService_Install(b *testing.B) {
 
 	svc := newTestService(cache, manifest, downloader, sources)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = svc.Install(ctx, "test-plugin", InstallOptions{})
 	}
 }
@@ -2067,8 +2064,7 @@ func BenchmarkService_Update(b *testing.B) {
 
 	svc := newTestService(cache, manifest, downloader, sources)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = svc.Update(ctx, UpdateOptions{})
 	}
 }
@@ -2096,8 +2092,7 @@ func BenchmarkService_Uninstall(b *testing.B) {
 
 	svc := newTestService(&mockCacheManager{}, manifest, &mockDownloader{}, []PluginSource{})
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = svc.Uninstall(ctx, "", UninstallOptions{All: true})
 	}
 }

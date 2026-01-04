@@ -165,7 +165,7 @@ func TestGetScanHandler_Success(t *testing.T) {
 				Status:    "completed",
 				StartTime: "2024-01-01T00:00:00Z",
 				EndTime:   "2024-01-01T00:05:00Z",
-				Results: map[string]interface{}{
+				Results: map[string]any{
 					"hosts_found": 10,
 				},
 			},

@@ -15,9 +15,9 @@ import (
 
 // DAGNodeConfig defines the configuration for a single node (module instance) in the DAG.
 type DAGNodeConfig struct {
-	InstanceID string                 `yaml:"instance_id"` // Unique ID for this module instance in the DAG
-	ModuleType string                 `yaml:"module_type"` // Registered name of the module (e.g., "icmp-ping-discovery")
-	Config     map[string]interface{} `yaml:"config"`      // Module-specific configuration
+	InstanceID string         `yaml:"instance_id"` // Unique ID for this module instance in the DAG
+	ModuleType string         `yaml:"module_type"` // Registered name of the module (e.g., "icmp-ping-discovery")
+	Config     map[string]any `yaml:"config"`      // Module-specific configuration
 }
 
 // DAGDefinition defines the entire Directed Acyclic Graph of modules for a scan.
@@ -164,7 +164,7 @@ func NewOrchestrator(dagDef *DAGDefinition) (*Orchestrator, error) {
 		nodeLogger := orc.logger.With().Str("node_instance_id", node.instanceID).Logger()
 
 		// First, check for explicit dependencies from DAGSchema (stored in config as __depends_on)
-		if explicitDeps, ok := node.config.Config["__depends_on"].([]interface{}); ok {
+		if explicitDeps, ok := node.config.Config["__depends_on"].([]any); ok {
 			for _, depIDInterface := range explicitDeps {
 				if depID, ok := depIDInterface.(string); ok {
 					if depNode, exists := orc.moduleNodes[depID]; exists {
@@ -274,7 +274,7 @@ func NewOrchestrator(dagDef *DAGDefinition) (*Orchestrator, error) {
 //     to protect shared state.
 //
 // nolint:gocyclo // complex coordination; consider splitting in future iterations
-func (o *Orchestrator) Run(ctx context.Context, initialInputs map[string]interface{}) (map[string]interface{}, error) {
+func (o *Orchestrator) Run(ctx context.Context, initialInputs map[string]any) (map[string]any, error) {
 	logger := log.With().Str("dag", o.dag.Name).Logger()
 	logger.Info().Msg("Starting DAG execution")
 
@@ -285,7 +285,7 @@ func (o *Orchestrator) Run(ctx context.Context, initialInputs map[string]interfa
 	if initialInputs != nil {
 		if raw, ok := initialInputs["config.targets"]; ok {
 			if targets, ok2 := raw.([]string); ok2 {
-				_ = o.dataCtx.RegisterType("config.targets", reflect.TypeOf([]string{}), CardinalitySingle)
+				_ = o.dataCtx.RegisterType("config.targets", reflect.TypeFor[[]string](), CardinalitySingle)
 				_ = o.dataCtx.PublishValue("config.targets", targets)
 			} else {
 				o.dataCtx.SetInitial("config.targets", raw)
@@ -335,7 +335,7 @@ func (o *Orchestrator) Run(ctx context.Context, initialInputs map[string]interfa
 
 			// Check if all dependencies are met
 			dependenciesMet := true
-			nodeInputs := make(map[string]interface{})
+			nodeInputs := make(map[string]any)
 
 			// 1. Gather inputs from dependencies
 			for _, dep := range node.dependencies {
@@ -366,7 +366,7 @@ func (o *Orchestrator) Run(ctx context.Context, initialInputs map[string]interfa
 				for dataKey, output := range dep.outputs {
 					// Key for data context from producer: instanceID.dataKey
 					// Key for consumer: dataKey
-					nodeInputs[dataKey] = []interface{}{output.Data}
+					nodeInputs[dataKey] = []any{output.Data}
 				}
 			}
 
@@ -406,8 +406,8 @@ func (o *Orchestrator) Run(ctx context.Context, initialInputs map[string]interfa
 					}
 				} else {
 					if dataVal, dataOk := o.dataCtx.Get(consumedKeyString); dataOk {
-						if dataSlice, ok1 := dataVal.([]interface{}); ok1 {
-							if nodeSlice, ok2 := nodeInputs[consumedKeyString].([]interface{}); ok2 {
+						if dataSlice, ok1 := dataVal.([]any); ok1 {
+							if nodeSlice, ok2 := nodeInputs[consumedKeyString].([]any); ok2 {
 								if len(dataSlice) > len(nodeSlice) {
 									nodeInputs[consumedKeyString] = dataVal
 								}
@@ -422,7 +422,7 @@ func (o *Orchestrator) Run(ctx context.Context, initialInputs map[string]interfa
 			activeGoroutines.Add(1)
 			madeProgressInIteration = true
 
-			go func(currentNode *runtimeNode, inputsForNode map[string]interface{}) {
+			go func(currentNode *runtimeNode, inputsForNode map[string]any) {
 				defer activeGoroutines.Done()
 
 				execContext, execCancel := context.WithCancel(ctx) // Create a context for this specific execution
@@ -454,10 +454,8 @@ func (o *Orchestrator) Run(ctx context.Context, initialInputs map[string]interfa
 				outputChan := make(chan ModuleOutput, 10) // Buffered channel
 				var moduleErr error
 				var moduleWg sync.WaitGroup
-				moduleWg.Add(1)
 
-				go func() {
-					defer moduleWg.Done()
+				moduleWg.Go(func() {
 					defer func() {
 						// Catch panic in module execution
 						if r := recover(); r != nil {
@@ -467,7 +465,7 @@ func (o *Orchestrator) Run(ctx context.Context, initialInputs map[string]interfa
 						close(outputChan)
 					}()
 					moduleErr = currentNode.module.Execute(execContext, inputsForNode, outputChan)
-				}()
+				})
 
 				for output := range outputChan {
 					if output.FromModuleName == "" {

@@ -109,12 +109,12 @@ func TestNewTCPPortDiscoveryModule_Defaults(t *testing.T) {
 func TestTCPPortDiscoveryModule_Init(t *testing.T) {
 	tests := []struct {
 		name       string
-		input      map[string]interface{}
+		input      map[string]any
 		wantConfig TCPPortDiscoveryConfig
 	}{
 		{
 			name:  "empty config uses defaults",
-			input: map[string]interface{}{},
+			input: map[string]any{},
 			wantConfig: TCPPortDiscoveryConfig{
 				Targets:     nil,
 				Ports:       []string{"1-1024"},
@@ -124,7 +124,7 @@ func TestTCPPortDiscoveryModule_Init(t *testing.T) {
 		},
 		{
 			name: "set targets and ports",
-			input: map[string]interface{}{
+			input: map[string]any{
 				"targets": []string{"127.0.0.1", "192.168.1.1"},
 				"ports":   []string{"22", "80-81"},
 			},
@@ -137,7 +137,7 @@ func TestTCPPortDiscoveryModule_Init(t *testing.T) {
 		},
 		{
 			name: "set timeout and concurrency",
-			input: map[string]interface{}{
+			input: map[string]any{
 				"timeout":     "2s",
 				"concurrency": 50,
 			},
@@ -150,7 +150,7 @@ func TestTCPPortDiscoveryModule_Init(t *testing.T) {
 		},
 		{
 			name: "invalid timeout falls back to default",
-			input: map[string]interface{}{
+			input: map[string]any{
 				"timeout": "notaduration",
 			},
 			wantConfig: TCPPortDiscoveryConfig{
@@ -162,7 +162,7 @@ func TestTCPPortDiscoveryModule_Init(t *testing.T) {
 		},
 		{
 			name: "concurrency less than 1 falls back to default",
-			input: map[string]interface{}{
+			input: map[string]any{
 				"concurrency": 0,
 			},
 			wantConfig: TCPPortDiscoveryConfig{
@@ -174,7 +174,7 @@ func TestTCPPortDiscoveryModule_Init(t *testing.T) {
 		},
 		{
 			name: "empty ports falls back to default",
-			input: map[string]interface{}{
+			input: map[string]any{
 				"ports": []string{""},
 			},
 			wantConfig: TCPPortDiscoveryConfig{
@@ -219,7 +219,7 @@ func TestTCPPortDiscoveryModule_Execute_NoTargets(t *testing.T) {
 	outputs := make(chan engine.ModuleOutput, 1)
 
 	// No targets in config or input
-	err := module.Execute(ctx, map[string]interface{}{}, outputs)
+	err := module.Execute(ctx, map[string]any{}, outputs)
 	if err == nil {
 		t.Error("expected error when no targets are specified")
 	}
@@ -241,7 +241,7 @@ func TestTCPPortDiscoveryModule_Execute_InvalidPorts(t *testing.T) {
 	ctx := context.Background()
 	outputs := make(chan engine.ModuleOutput, 1)
 
-	err := module.Execute(ctx, map[string]interface{}{}, outputs)
+	err := module.Execute(ctx, map[string]any{}, outputs)
 	if err == nil {
 		t.Error("expected error for invalid port configuration")
 	}
@@ -263,7 +263,7 @@ func TestTCPPortDiscoveryModule_Execute_EmptyTargetsAfterExpansion(t *testing.T)
 	ctx := context.Background()
 	outputs := make(chan engine.ModuleOutput, 1)
 
-	err := module.Execute(ctx, map[string]interface{}{}, outputs)
+	err := module.Execute(ctx, map[string]any{}, outputs)
 	if err == nil {
 		t.Error("expected error when no targets are specified")
 	}
@@ -285,7 +285,7 @@ func TestTCPPortDiscoveryModule_Execute_EmptyPortsAfterParsing(t *testing.T) {
 	ctx := context.Background()
 	outputs := make(chan engine.ModuleOutput, 1)
 
-	err := module.Execute(ctx, map[string]interface{}{}, outputs)
+	err := module.Execute(ctx, map[string]any{}, outputs)
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
@@ -312,7 +312,7 @@ func TestTCPPortDiscoveryModule_Execute_SuccessLocalhost(t *testing.T) {
 	ctx := context.Background()
 	outputs := make(chan engine.ModuleOutput, 10)
 
-	err := module.Execute(ctx, map[string]interface{}{}, outputs)
+	err := module.Execute(ctx, map[string]any{}, outputs)
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
@@ -343,7 +343,7 @@ func TestTCPPortDiscoveryModule_Execute_ContextCancelled(t *testing.T) {
 
 	// Cancel context immediately
 	cancel()
-	err := module.Execute(ctx, map[string]interface{}{}, outputs)
+	err := module.Execute(ctx, map[string]any{}, outputs)
 	if err != nil && err != context.Canceled {
 		t.Errorf("expected context.Canceled or nil, got %v", err)
 	}

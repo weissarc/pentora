@@ -15,8 +15,8 @@ func parsePortsString(portsStr string) ([]int, error) {
 	seenPorts := make(map[int]bool)
 	var result []int
 
-	parts := strings.Split(portsStr, ",")
-	for _, part := range parts {
+	parts := strings.SplitSeq(portsStr, ",")
+	for part := range parts {
 		part = strings.TrimSpace(part)
 		if part == "" {
 			continue

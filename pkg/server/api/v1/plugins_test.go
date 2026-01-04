@@ -438,7 +438,7 @@ func TestUninstallPluginHandler_Success(t *testing.T) {
 	require.Equal(t, http.StatusOK, w.Code)
 	require.Equal(t, "application/json", w.Header().Get("Content-Type"))
 
-	var resp map[string]interface{}
+	var resp map[string]any
 	err := json.NewDecoder(w.Body).Decode(&resp)
 	require.NoError(t, err)
 	require.Equal(t, "plugin uninstalled successfully", resp["message"])

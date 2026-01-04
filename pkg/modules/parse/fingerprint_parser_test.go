@@ -71,8 +71,8 @@ func TestFingerprintParserModule_Execute_FullCoverage(t *testing.T) {
 		},
 	}
 
-	inputs := map[string]interface{}{
-		"service.banner.tcp": []interface{}{banner},
+	inputs := map[string]any{
+		"service.banner.tcp": []any{banner},
 	}
 	outputChan := make(chan engine.ModuleOutput, 10)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -115,7 +115,7 @@ func TestFingerprintParserModule_Execute_NoInputKey(t *testing.T) {
 	out := make(chan engine.ModuleOutput)
 	defer close(out)
 
-	err := m.Execute(context.Background(), map[string]interface{}{}, out)
+	err := m.Execute(context.Background(), map[string]any{}, out)
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
 	}
@@ -126,7 +126,7 @@ func TestFingerprintParserModule_Execute_InvalidType(t *testing.T) {
 	out := make(chan engine.ModuleOutput)
 	defer close(out)
 
-	err := m.Execute(context.Background(), map[string]interface{}{
+	err := m.Execute(context.Background(), map[string]any{
 		"service.banner.tcp": "not-a-list",
 	}, out)
 	if err != nil {
@@ -139,8 +139,8 @@ func TestFingerprintParserModule_Execute_InvalidElementType(t *testing.T) {
 	out := make(chan engine.ModuleOutput)
 	defer close(out)
 
-	err := m.Execute(context.Background(), map[string]interface{}{
-		"service.banner.tcp": []interface{}{"not-banner"},
+	err := m.Execute(context.Background(), map[string]any{
+		"service.banner.tcp": []any{"not-banner"},
 	}, out)
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
@@ -422,8 +422,8 @@ func TestFingerprintParserModule_TLSMetadataEmission(t *testing.T) {
 		},
 	}
 
-	inputs := map[string]interface{}{
-		"service.banner.tcp": []interface{}{banner},
+	inputs := map[string]any{
+		"service.banner.tcp": []any{banner},
 	}
 	outputChan := make(chan engine.ModuleOutput, 20)
 	ctx := context.Background()
@@ -553,8 +553,8 @@ func TestFingerprintParserModule_NoTLSMetadata(t *testing.T) {
 		},
 	}
 
-	inputs := map[string]interface{}{
-		"service.banner.tcp": []interface{}{banner},
+	inputs := map[string]any{
+		"service.banner.tcp": []any{banner},
 	}
 	outputChan := make(chan engine.ModuleOutput, 20)
 	ctx := context.Background()

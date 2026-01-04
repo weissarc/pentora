@@ -14,22 +14,22 @@ import (
 
 func TestAssetProfileBuilderUsesFingerprintForNonDefaultPort(t *testing.T) {
 	module := newAssetProfileBuilderModule()
-	if err := module.Init(assetProfileBuilderModuleTypeName, map[string]interface{}{}); err != nil {
+	if err := module.Init(assetProfileBuilderModuleTypeName, map[string]any{}); err != nil {
 		t.Fatalf("init module failed: %v", err)
 	}
 
 	target := "192.0.2.10"
 	port := 20022
 
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"config.targets": []string{target},
-		"discovery.open_tcp_ports": []interface{}{
+		"discovery.open_tcp_ports": []any{
 			discovery.TCPPortDiscoveryResult{Target: target, OpenPorts: []int{port}},
 		},
-		"service.banner.tcp": []interface{}{
+		"service.banner.tcp": []any{
 			scan.BannerGrabResult{IP: target, Port: port, Banner: "SSH-2.0-OpenSSH_8.9p1"},
 		},
-		"service.fingerprint.details": []interface{}{
+		"service.fingerprint.details": []any{
 			parse.FingerprintParsedInfo{Target: target, Port: port, Protocol: "ssh", Product: "OpenSSH", Version: "8.9p1", Confidence: 0.92},
 		},
 	}
@@ -86,7 +86,7 @@ func TestAssetProfileBuilderModuleFactory_InitExecuteProducesAssetProfilesKey(t 
 	t.Parallel()
 
 	mod := AssetProfileBuilderModuleFactory()
-	if err := mod.Init("factory-instance", map[string]interface{}{}); err != nil {
+	if err := mod.Init("factory-instance", map[string]any{}); err != nil {
 		t.Fatalf("Init failed: %v", err)
 	}
 	if mod.Metadata().ID != "factory-instance" {
@@ -94,7 +94,7 @@ func TestAssetProfileBuilderModuleFactory_InitExecuteProducesAssetProfilesKey(t 
 	}
 
 	outCh := make(chan engine.ModuleOutput, 1)
-	if err := mod.Execute(context.Background(), map[string]interface{}{}, outCh); err != nil {
+	if err := mod.Execute(context.Background(), map[string]any{}, outCh); err != nil {
 		t.Fatalf("Execute failed: %v", err)
 	}
 
@@ -113,7 +113,7 @@ func TestAssetProfileBuilderModuleFactory_InitExecuteProducesAssetProfilesKey(t 
 
 func TestAssetProfileBuilderMapsVulnerabilitiesToPort(t *testing.T) {
 	module := newAssetProfileBuilderModule()
-	if err := module.Init(assetProfileBuilderModuleTypeName, map[string]interface{}{}); err != nil {
+	if err := module.Init(assetProfileBuilderModuleTypeName, map[string]any{}); err != nil {
 		t.Fatalf("init module failed: %v", err)
 	}
 
@@ -131,12 +131,12 @@ func TestAssetProfileBuilderMapsVulnerabilitiesToPort(t *testing.T) {
 		Reference:   "http://example.com/vuln",
 	}
 
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"config.targets": []string{target},
-		"discovery.open_tcp_ports": []interface{}{
+		"discovery.open_tcp_ports": []any{
 			discovery.TCPPortDiscoveryResult{Target: target, OpenPorts: []int{port}},
 		},
-		"evaluation.vulnerabilities": []interface{}{vuln},
+		"evaluation.vulnerabilities": []any{vuln},
 	}
 
 	outCh := make(chan engine.ModuleOutput, 1)
@@ -181,12 +181,12 @@ func TestAssetProfileBuilderMapsVulnerabilitiesToPort(t *testing.T) {
 
 func TestAssetProfileBuilder_Execute_EmptyInputs(t *testing.T) {
 	module := newAssetProfileBuilderModule()
-	if err := module.Init("test-empty", map[string]interface{}{}); err != nil {
+	if err := module.Init("test-empty", map[string]any{}); err != nil {
 		t.Fatalf("Init failed: %v", err)
 	}
 
 	outCh := make(chan engine.ModuleOutput, 1)
-	err := module.Execute(context.Background(), map[string]interface{}{}, outCh)
+	err := module.Execute(context.Background(), map[string]any{}, outCh)
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
 	}
@@ -207,12 +207,12 @@ func TestAssetProfileBuilder_Execute_EmptyInputs(t *testing.T) {
 
 func TestAssetProfileBuilder_Execute_InitialTargetsOnly(t *testing.T) {
 	module := newAssetProfileBuilderModule()
-	if err := module.Init("test-initial", map[string]interface{}{}); err != nil {
+	if err := module.Init("test-initial", map[string]any{}); err != nil {
 		t.Fatalf("Init failed: %v", err)
 	}
 
 	targets := []string{"192.0.2.1", "192.0.2.2"}
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"config.targets": targets,
 	}
 
@@ -243,21 +243,21 @@ func TestAssetProfileBuilder_Execute_InitialTargetsOnly(t *testing.T) {
 
 func TestAssetProfileBuilder_Execute_LiveHostsAndOpenPorts(t *testing.T) {
 	module := newAssetProfileBuilderModule()
-	if err := module.Init("test-live", map[string]interface{}{}); err != nil {
+	if err := module.Init("test-live", map[string]any{}); err != nil {
 		t.Fatalf("Init failed: %v", err)
 	}
 
 	target := "192.0.2.5"
 	port := 443
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"config.targets": []string{target},
-		"discovery.live_hosts": []interface{}{
+		"discovery.live_hosts": []any{
 			discovery.ICMPPingDiscoveryResult{LiveHosts: []string{target}},
 		},
-		"discovery.open_tcp_ports": []interface{}{
+		"discovery.open_tcp_ports": []any{
 			discovery.TCPPortDiscoveryResult{Target: target, OpenPorts: []int{port}},
 		},
-		"service.banner.tcp": []interface{}{
+		"service.banner.tcp": []any{
 			scan.BannerGrabResult{IP: target, Port: port, Banner: "HTTPS Service", IsTLS: true},
 		},
 	}
@@ -301,7 +301,7 @@ func TestAssetProfileBuilder_Execute_LiveHostsAndOpenPorts(t *testing.T) {
 
 func TestAssetProfileBuilder_Execute_HTTPAndSSHDetails(t *testing.T) {
 	module := newAssetProfileBuilderModule()
-	if err := module.Init("test-details", map[string]interface{}{}); err != nil {
+	if err := module.Init("test-details", map[string]any{}); err != nil {
 		t.Fatalf("Init failed: %v", err)
 	}
 
@@ -309,12 +309,12 @@ func TestAssetProfileBuilder_Execute_HTTPAndSSHDetails(t *testing.T) {
 	httpPort := 80
 	sshPort := 22
 
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"config.targets": []string{target},
-		"discovery.open_tcp_ports": []interface{}{
+		"discovery.open_tcp_ports": []any{
 			discovery.TCPPortDiscoveryResult{Target: target, OpenPorts: []int{httpPort, sshPort}},
 		},
-		"service.http.details": []interface{}{
+		"service.http.details": []any{
 			parse.HTTPParsedInfo{
 				Target:        target,
 				Port:          httpPort,
@@ -327,7 +327,7 @@ func TestAssetProfileBuilder_Execute_HTTPAndSSHDetails(t *testing.T) {
 				Headers:       map[string]string{"Server": "nginx"},
 			},
 		},
-		"service.ssh.details": []interface{}{
+		"service.ssh.details": []any{
 			parse.SSHParsedInfo{
 				Target:          target,
 				Port:            sshPort,
@@ -406,22 +406,22 @@ func TestAssetProfileBuilder_Execute_HTTPAndSSHDetails(t *testing.T) {
 
 func TestAssetProfileBuilder_Execute_FingerprintOverridesBanner(t *testing.T) {
 	module := newAssetProfileBuilderModule()
-	if err := module.Init("test-fp", map[string]interface{}{}); err != nil {
+	if err := module.Init("test-fp", map[string]any{}); err != nil {
 		t.Fatalf("Init failed: %v", err)
 	}
 
 	target := "192.0.2.20"
 	port := 8081
 
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"config.targets": []string{target},
-		"discovery.open_tcp_ports": []interface{}{
+		"discovery.open_tcp_ports": []any{
 			discovery.TCPPortDiscoveryResult{Target: target, OpenPorts: []int{port}},
 		},
-		"service.banner.tcp": []interface{}{
+		"service.banner.tcp": []any{
 			scan.BannerGrabResult{IP: target, Port: port, Banner: "SomeBanner"},
 		},
-		"service.fingerprint.details": []interface{}{
+		"service.fingerprint.details": []any{
 			parse.FingerprintParsedInfo{
 				Target:      target,
 				Port:        port,

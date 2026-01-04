@@ -63,7 +63,7 @@ func newAssetProfileBuilderModule() *AssetProfileBuilderModule {
 
 func (m *AssetProfileBuilderModule) Metadata() engine.ModuleMetadata { return m.meta }
 
-func (m *AssetProfileBuilderModule) Init(instanceID string, configMap map[string]interface{}) error {
+func (m *AssetProfileBuilderModule) Init(instanceID string, configMap map[string]any) error {
 	m.meta.ID = instanceID
 	logger := log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
 	logger.Debug().Msg("Initializing AssetProfileBuilderModule")
@@ -72,7 +72,7 @@ func (m *AssetProfileBuilderModule) Init(instanceID string, configMap map[string
 }
 
 //nolint:gocyclo // Complexity is inherent to aggregation logic
-func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- engine.ModuleOutput) error {
+func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[string]any, outputChan chan<- engine.ModuleOutput) error {
 	logger := log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
 	logger.Info().Msg("Starting asset profile aggregation")
 	logger.Debug().Interface("received_inputs_for_aggregation", inputs).Msg("Full inputs")
@@ -93,7 +93,7 @@ func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[stri
 
 	liveHostResults := []discovery.ICMPPingDiscoveryResult{}
 	if rawLiveHosts, ok := inputs["discovery.live_hosts"]; ok {
-		if list, listOk := rawLiveHosts.([]interface{}); listOk {
+		if list, listOk := rawLiveHosts.([]any); listOk {
 			for _, item := range list {
 				if casted, castOk := item.(discovery.ICMPPingDiscoveryResult); castOk {
 					liveHostResults = append(liveHostResults, casted)
@@ -104,7 +104,7 @@ func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[stri
 
 	openTCPPortResults := []discovery.TCPPortDiscoveryResult{}
 	if rawOpenTCPPorts, ok := inputs["discovery.open_tcp_ports"]; ok {
-		if list, listOk := rawOpenTCPPorts.([]interface{}); listOk {
+		if list, listOk := rawOpenTCPPorts.([]any); listOk {
 			for _, item := range list {
 				if casted, castOk := item.(discovery.TCPPortDiscoveryResult); castOk {
 					openTCPPortResults = append(openTCPPortResults, casted)
@@ -115,7 +115,7 @@ func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[stri
 
 	bannerResults := []scan.BannerGrabResult{}
 	if rawBanners, ok := inputs["service.banner.tcp"]; ok { // veya service.banner.raw
-		if list, listOk := rawBanners.([]interface{}); listOk {
+		if list, listOk := rawBanners.([]any); listOk {
 			for _, item := range list {
 				if casted, castOk := item.(scan.BannerGrabResult); castOk {
 					bannerResults = append(bannerResults, casted)
@@ -128,7 +128,7 @@ func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[stri
 
 	httpDetailsResults := []parse.HTTPParsedInfo{}
 	if rawHTTP, ok := inputs["service.http.details"]; ok {
-		if list, listOk := rawHTTP.([]interface{}); listOk {
+		if list, listOk := rawHTTP.([]any); listOk {
 			for _, item := range list {
 				if casted, castOk := item.(parse.HTTPParsedInfo); castOk {
 					httpDetailsResults = append(httpDetailsResults, casted)
@@ -139,7 +139,7 @@ func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[stri
 
 	sshDetailsResults := []parse.SSHParsedInfo{}
 	if rawSSH, ok := inputs["service.ssh.details"]; ok {
-		if list, listOk := rawSSH.([]interface{}); listOk {
+		if list, listOk := rawSSH.([]any); listOk {
 			for _, item := range list {
 				if casted, castOk := item.(parse.SSHParsedInfo); castOk {
 					sshDetailsResults = append(sshDetailsResults, casted)
@@ -150,7 +150,7 @@ func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[stri
 
 	fingerprintDetails := []parse.FingerprintParsedInfo{}
 	if rawFP, ok := inputs["service.fingerprint.details"]; ok {
-		if list, listOk := rawFP.([]interface{}); listOk {
+		if list, listOk := rawFP.([]any); listOk {
 			for _, item := range list {
 				if casted, castOk := item.(parse.FingerprintParsedInfo); castOk {
 					fingerprintDetails = append(fingerprintDetails, casted)
@@ -169,7 +169,7 @@ func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[stri
 	for key, data := range inputs {
 		// Check for both legacy "vulnerability.*" pattern and new "evaluation.vulnerabilities"
 		if strings.Contains(key, "vulnerability") || strings.Contains(key, "evaluation.vulnerabilities") {
-			if vulnList, listOk := data.([]interface{}); listOk {
+			if vulnList, listOk := data.([]any); listOk {
 				for _, item := range vulnList {
 					// Try evaluation.VulnerabilityResult (new format from plugin evaluation)
 					if vulnResult, ok := item.(evaluation.VulnerabilityResult); ok {
@@ -278,7 +278,7 @@ func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[stri
 							}
 							portProfile.Service.Version = httpDetail.ServerVersion
 							if portProfile.Service.ParsedAttributes == nil {
-								portProfile.Service.ParsedAttributes = make(map[string]interface{})
+								portProfile.Service.ParsedAttributes = make(map[string]any)
 							}
 							portProfile.Service.ParsedAttributes["http_status_code"] = httpDetail.StatusCode
 							portProfile.Service.ParsedAttributes["http_version"] = httpDetail.HTTPVersion
@@ -296,7 +296,7 @@ func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[stri
 							portProfile.Service.Product = sshDetail.Software
 							portProfile.Service.Version = sshDetail.SoftwareVersion
 							if portProfile.Service.ParsedAttributes == nil {
-								portProfile.Service.ParsedAttributes = make(map[string]interface{})
+								portProfile.Service.ParsedAttributes = make(map[string]any)
 							}
 							portProfile.Service.ParsedAttributes["ssh_protocol_version"] = sshDetail.SSHVersion
 							portProfile.Service.ParsedAttributes["ssh_full_version_info"] = sshDetail.VersionInfo
@@ -318,7 +318,7 @@ func (m *AssetProfileBuilderModule) Execute(ctx context.Context, inputs map[stri
 					}
 					if len(fpMatches) > 0 {
 						if portProfile.Service.ParsedAttributes == nil {
-							portProfile.Service.ParsedAttributes = make(map[string]interface{})
+							portProfile.Service.ParsedAttributes = make(map[string]any)
 						}
 						if primaryFP != nil {
 							if portProfile.Service.Name == "" {

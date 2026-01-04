@@ -592,7 +592,7 @@ func TestLocalScanStore_ListPaginated_AllBranches(t *testing.T) {
 
 	// create sample scans
 	now := time.Now()
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		scan := &ScanMetadata{
 			ID:        fmt.Sprintf("scan-%d", i),
 			Target:    "target",

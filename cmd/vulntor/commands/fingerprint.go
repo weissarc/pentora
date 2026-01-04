@@ -107,7 +107,7 @@ func newFingerprintValidateCommand() *cobra.Command {
 
 			// Output results
 			if jsonOutput {
-				return formatter.PrintJSON(map[string]interface{}{
+				return formatter.PrintJSON(map[string]any{
 					"valid":      result.IsValid(),
 					"rule_count": result.RuleCount,
 					"errors":     result.Errors,

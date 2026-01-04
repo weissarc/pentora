@@ -57,7 +57,7 @@ func TestPluginEvaluationModule_Metadata(t *testing.T) {
 func TestPluginEvaluationModule_Init(t *testing.T) {
 	module := NewPluginEvaluationModule()
 
-	err := module.Init("test-instance", map[string]interface{}{})
+	err := module.Init("test-instance", map[string]any{})
 	require.NoError(t, err)
 
 	meta := module.Metadata()
@@ -96,7 +96,7 @@ func TestPluginEvaluationModule_Execute_WithContext(t *testing.T) {
 	ctx := context.Background()
 
 	// Provide input context that should match TLS weak protocol plugin
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"tls.version":  "TLSv1.0", // Should match tls-weak-protocol plugin
 		"service.port": 443,
 	}
@@ -138,7 +138,7 @@ func TestPluginEvaluationModule_Execute_NoContext(t *testing.T) {
 	require.NoError(t, module.Init("test-instance", nil))
 
 	ctx := context.Background()
-	inputs := map[string]interface{}{} // Empty context
+	inputs := map[string]any{} // Empty context
 
 	outputChan := make(chan engine.ModuleOutput, 10)
 	done := make(chan struct{})
@@ -166,7 +166,7 @@ func TestPluginEvaluationModule_Execute_TLSWeakCipher(t *testing.T) {
 	ctx := context.Background()
 
 	// Context that should match TLS weak cipher plugin
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"tls.cipher_suites": []string{"TLS_RSA_WITH_DES_CBC_SHA"}, // Weak cipher
 		"service.port":      443,
 	}
@@ -210,7 +210,7 @@ func TestPluginEvaluationModuleFactory(t *testing.T) {
 
 func TestPluginEvaluationModule_Registration(t *testing.T) {
 	// Test that module is registered in engine registry
-	module, err := engine.GetModuleInstance("test-id", pluginEvalModuleName, map[string]interface{}{})
+	module, err := engine.GetModuleInstance("test-id", pluginEvalModuleName, map[string]any{})
 	require.NoError(t, err)
 	require.NotNil(t, module)
 
@@ -245,10 +245,10 @@ func TestVulnerabilityResult_Structure(t *testing.T) {
 func TestBuildEvaluationContext_ArrayAndScalar(t *testing.T) {
 	module := NewPluginEvaluationModule()
 
-	inputs := map[string]interface{}{
-		"ssh.version": []interface{}{"OpenSSH_8.0"},
+	inputs := map[string]any{
+		"ssh.version": []any{"OpenSSH_8.0"},
 		"http.server": "nginx/1.18",
-		"tls.version": []interface{}{"TLSv1.2"},
+		"tls.version": []any{"TLSv1.2"},
 	}
 
 	ctx := module.buildEvaluationContext(inputs)
@@ -262,14 +262,14 @@ func TestBuildEvaluationContext_SSHDetails_MapFallback(t *testing.T) {
 	module := NewPluginEvaluationModule()
 
 	// Provide service.ssh.details as a mapped form (JSON-decoded style)
-	sshDetails := []interface{}{
-		map[string]interface{}{
+	sshDetails := []any{
+		map[string]any{
 			"target": "192.0.2.10",
 			"port":   float64(2222), // simulate JSON number -> float64
 		},
 	}
 
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"service.ssh.details": sshDetails,
 	}
 
@@ -284,14 +284,14 @@ func TestBuildEvaluationContext_BannerGrab_MapFallback(t *testing.T) {
 	module := NewPluginEvaluationModule()
 
 	// No ssh.details provided, so banner fallback should set target/port
-	banners := []interface{}{
-		map[string]interface{}{
+	banners := []any{
+		map[string]any{
 			"ip":   "203.0.113.5",
 			"port": float64(8080),
 		},
 	}
 
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"service.banner.tcp": banners,
 	}
 

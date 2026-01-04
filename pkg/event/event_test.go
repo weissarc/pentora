@@ -74,7 +74,7 @@ func TestBus_ConcurrentAccess(t *testing.T) {
 	})
 
 	ctx := context.Background()
-	for i := 0; i < 100; i++ {
+	for range 100 {
 		go bus.Publish(ctx, "test_event", nil)
 	}
 

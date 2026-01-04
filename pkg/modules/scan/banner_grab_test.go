@@ -71,13 +71,13 @@ func TestBannerGrabModule_Init(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		config      map[string]interface{}
+		config      map[string]any
 		expected    BannerGrabConfig
 		expectError bool
 	}{
 		{
 			name: "default values",
-			config: map[string]interface{}{
+			config: map[string]any{
 				"read_timeout":             "4s",
 				"connect_timeout":          "3s",
 				"tls_insecure_skip_verify": false,
@@ -93,7 +93,7 @@ func TestBannerGrabModule_Init(t *testing.T) {
 		},
 		{
 			name: "invalid timeout values",
-			config: map[string]interface{}{
+			config: map[string]any{
 				"read_timeout":    "invalid",
 				"connect_timeout": "invalid",
 			},
@@ -109,7 +109,7 @@ func TestBannerGrabModule_Init(t *testing.T) {
 		},
 		{
 			name: "custom buffer size and concurrency",
-			config: map[string]interface{}{
+			config: map[string]any{
 				"buffer_size": 4096,
 				"concurrency": 100,
 			},
@@ -124,7 +124,7 @@ func TestBannerGrabModule_Init(t *testing.T) {
 		},
 		{
 			name: "disable probes",
-			config: map[string]interface{}{
+			config: map[string]any{
 				"send_probes": false,
 			},
 			expected: BannerGrabConfig{
@@ -138,7 +138,7 @@ func TestBannerGrabModule_Init(t *testing.T) {
 		},
 		{
 			name: "invalid sanitize values",
-			config: map[string]interface{}{
+			config: map[string]any{
 				"read_timeout":    "0s",
 				"connect_timeout": "0s",
 				"buffer_size":     -1,
@@ -156,7 +156,6 @@ func TestBannerGrabModule_Init(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -275,7 +274,7 @@ func TestBannerGrabModule_Execute_MissingInput(t *testing.T) {
 	module := newBannerGrabModule()
 	outputChan := make(chan engine.ModuleOutput, 1)
 
-	err := module.Execute(context.Background(), map[string]interface{}{}, outputChan)
+	err := module.Execute(context.Background(), map[string]any{}, outputChan)
 	if err != nil {
 		t.Fatalf("Unexpected error: %v", err)
 	}
@@ -558,7 +557,6 @@ func TestExtractTLSObservation_Phase17(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

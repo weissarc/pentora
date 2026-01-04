@@ -28,8 +28,7 @@ func BenchmarkResolverSingleMatch(b *testing.B) {
 		Banner:   "Server: Apache/2.4.41 (Ubuntu)",
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = resolver.Resolve(context.Background(), input)
 	}
 }
@@ -49,8 +48,7 @@ func BenchmarkResolverMultipleRules(b *testing.B) {
 		Banner:   "Server: Apache/2.4.41 (Ubuntu)",
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = resolver.Resolve(context.Background(), input)
 	}
 }
@@ -69,8 +67,7 @@ func BenchmarkResolverNoMatch(b *testing.B) {
 		Banner:   "JUNK DATA NO MATCH",
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = resolver.Resolve(context.Background(), input)
 	}
 }
@@ -96,8 +93,7 @@ func BenchmarkResolverVersionExtraction(b *testing.B) {
 		Banner:   "SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5",
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = resolver.Resolve(context.Background(), input)
 	}
 }
@@ -124,8 +120,7 @@ func BenchmarkResolverWithAntiPatterns(b *testing.B) {
 		Banner:   "Server: Apache/2.4.41 (Ubuntu)",
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = resolver.Resolve(context.Background(), input)
 	}
 }
@@ -161,8 +156,7 @@ func BenchmarkResolverWithTelemetry(b *testing.B) {
 		Banner:   "Server: Apache/2.4.41 (Ubuntu)",
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _ = resolver.Resolve(context.Background(), input)
 	}
 }
@@ -202,8 +196,7 @@ func BenchmarkValidationRunner(b *testing.B) {
 		b.Fatalf("failed to create runner: %v", err)
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_, _, _ = runner.Run(context.Background())
 	}
 }
@@ -227,8 +220,7 @@ func BenchmarkValidationMetricsCalculation(b *testing.B) {
 		b.Fatalf("failed to run validation: %v", err)
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = runner.calculateMetrics(results)
 	}
 }
@@ -240,8 +232,7 @@ func BenchmarkRulePreparation(b *testing.B) {
 		b.Fatalf("failed to load rules: %v", err)
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		_ = prepareRules(rules)
 	}
 }
@@ -255,8 +246,8 @@ func BenchmarkResolverMemory(b *testing.B) {
 	}
 	resolver := NewRuleBasedResolver(rules)
 	input := Input{Port: 80, Protocol: "http", Banner: "Server: Apache/2.4.41 (Ubuntu)"}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		_, _ = resolver.Resolve(context.Background(), input)
 	}
 }
@@ -272,8 +263,8 @@ func BenchmarkValidationRunnerMemory(b *testing.B) {
 	if err != nil {
 		b.Fatalf("failed to create runner: %v", err)
 	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		_, _, _ = runner.Run(context.Background())
 	}
 }
@@ -288,7 +279,7 @@ func generateLargeDataset(n int) []ValidationTestCase {
 		{"mysql", "5.7.31-log"},
 		{"redis", "+PONG"},
 	}
-	for i := 0; i < n; i++ {
+	for i := range n {
 		p := protos[i%len(protos)]
 		cases = append(cases, ValidationTestCase{
 			Protocol:        p.proto,
@@ -317,8 +308,8 @@ func BenchmarkValidationRunnerLargeDataset(b *testing.B) {
 	if err != nil {
 		b.Fatalf("runner: %v", err)
 	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		_, _, _ = runner.Run(context.Background())
 	}
 }
@@ -339,8 +330,8 @@ func BenchmarkValidationRunnerLargeDataset5k(b *testing.B) {
 	if err != nil {
 		b.Fatalf("runner: %v", err)
 	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		_, _, _ = runner.Run(context.Background())
 	}
 }
@@ -361,8 +352,8 @@ func BenchmarkValidationRunnerLargeDataset10k(b *testing.B) {
 	if err != nil {
 		b.Fatalf("runner: %v", err)
 	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		_, _, _ = runner.Run(context.Background())
 	}
 }

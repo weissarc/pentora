@@ -153,14 +153,14 @@ func newFingerprintParserModule() *FingerprintParserModule {
 // It implements the engine.Module interface.
 func (m *FingerprintParserModule) Metadata() engine.ModuleMetadata { return m.meta }
 
-func (m *FingerprintParserModule) Init(instanceID string, _ map[string]interface{}) error {
+func (m *FingerprintParserModule) Init(instanceID string, _ map[string]any) error {
 	m.meta.ID = instanceID
 	initLogger := log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
 	initLogger.Debug().Msg("Fingerprint parser initialized")
 	return nil
 }
 
-func (m *FingerprintParserModule) Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- engine.ModuleOutput) error {
+func (m *FingerprintParserModule) Execute(ctx context.Context, inputs map[string]any, outputChan chan<- engine.ModuleOutput) error {
 	logger := log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
 
 	raw, ok := inputs["service.banner.tcp"]
@@ -168,7 +168,7 @@ func (m *FingerprintParserModule) Execute(ctx context.Context, inputs map[string
 		return nil
 	}
 
-	bannerList, listOk := raw.([]interface{})
+	bannerList, listOk := raw.([]any)
 	if !listOk {
 		return nil
 	}

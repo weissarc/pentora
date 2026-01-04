@@ -14,9 +14,9 @@ func fakeFactory(meta ModuleMetadata) ModuleFactory {
 
 type fakeModule struct{ meta ModuleMetadata }
 
-func (f *fakeModule) Metadata() ModuleMetadata                  { return f.meta }
-func (f *fakeModule) Init(string, map[string]interface{}) error { return nil }
-func (f *fakeModule) Execute(_ context.Context, _ map[string]interface{}, _ chan<- ModuleOutput) error {
+func (f *fakeModule) Metadata() ModuleMetadata          { return f.meta }
+func (f *fakeModule) Init(string, map[string]any) error { return nil }
+func (f *fakeModule) Execute(_ context.Context, _ map[string]any, _ chan<- ModuleOutput) error {
 	return nil
 }
 
@@ -76,7 +76,7 @@ func TestPlanner_PlanDAG_DefaultProfile_SelectsAndConfigures(t *testing.T) {
 	// Verify unique instance IDs and configs applied
 	names := map[string]bool{}
 	hasDiscovery, hasScan, hasParse, hasReporter := false, false, false, false
-	var scanCfg map[string]interface{}
+	var scanCfg map[string]any
 	for _, n := range dag.Nodes {
 		if names[n.InstanceID] {
 			t.Fatalf("duplicate instance id: %s", n.InstanceID)

@@ -73,7 +73,7 @@ func ListScansHandler(deps *api.Deps) http.HandlerFunc {
 			}
 
 			// Return paginated response with cursor and total
-			response := map[string]interface{}{
+			response := map[string]any{
 				"scans":       scans,
 				"next_cursor": nextCursor,
 				"total":       total,
@@ -185,7 +185,7 @@ func getScanFromStorage(ctx context.Context, backend storage.Backend, scanID str
 	}
 
 	// Build results map
-	results := map[string]interface{}{
+	results := map[string]any{
 		"hosts_found":      metadata.HostCount,
 		"services_found":   metadata.ServiceCount,
 		"vulnerabilities":  metadata.VulnCount.Total(),

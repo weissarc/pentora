@@ -142,7 +142,7 @@ func TestDefaultOutput(t *testing.T) {
 		require.Len(t, mock.events, 1)
 		require.Equal(t, output.EventTable, mock.events[0].Type)
 
-		data, ok := mock.events[0].Data.(map[string]interface{})
+		data, ok := mock.events[0].Data.(map[string]any)
 		require.True(t, ok)
 		require.Equal(t, headers, data["headers"])
 		require.Equal(t, rows, data["rows"])
@@ -160,7 +160,7 @@ func TestDefaultOutput(t *testing.T) {
 		require.Equal(t, output.EventProgress, mock.events[0].Type)
 		require.Equal(t, "scanning", mock.events[0].Message)
 
-		data, ok := mock.events[0].Data.(map[string]interface{})
+		data, ok := mock.events[0].Data.(map[string]any)
 		require.True(t, ok)
 		require.Equal(t, 50, data["current"])
 		require.Equal(t, 100, data["total"])
@@ -172,7 +172,7 @@ func TestDefaultOutput(t *testing.T) {
 		stream.Subscribe(mock)
 
 		out := output.NewDefaultOutput(stream)
-		metadata := map[string]interface{}{"key": "value"}
+		metadata := map[string]any{"key": "value"}
 		out.Diag(output.LevelVerbose, "debug message", metadata)
 
 		require.Len(t, mock.events, 1)
@@ -200,7 +200,7 @@ func TestJSONFormatter(t *testing.T) {
 		require.True(t, formatter.ShouldHandle(event))
 		formatter.Handle(event)
 
-		var result map[string]interface{}
+		var result map[string]any
 		err := json.Unmarshal(buf.Bytes(), &result)
 		require.NoError(t, err)
 
@@ -280,7 +280,7 @@ func TestDiagnosticSubscriber(t *testing.T) {
 			Level:     output.LevelDebug,
 			Message:   "debug message",
 			Timestamp: time.Now(),
-			Metadata: map[string]interface{}{
+			Metadata: map[string]any{
 				"plugin": "ssh-banner",
 				"count":  42,
 			},
@@ -356,7 +356,7 @@ func TestHumanFormatter(t *testing.T) {
 
 		event := output.OutputEvent{
 			Type: output.EventTable,
-			Data: map[string]interface{}{
+			Data: map[string]any{
 				"headers": headers,
 				"rows":    rows,
 			},
@@ -405,7 +405,7 @@ func TestIntegration(t *testing.T) {
 
 		// Emit events
 		out.Info("Starting scan")
-		out.Diag(output.LevelVerbose, "Loading plugins", map[string]interface{}{"count": 15})
+		out.Diag(output.LevelVerbose, "Loading plugins", map[string]any{"count": 15})
 		out.Table([]string{"Host", "Port"}, [][]string{{"192.168.1.1", "22"}})
 
 		// Verify human output
@@ -440,13 +440,13 @@ func TestIntegration(t *testing.T) {
 		// Emit events
 		out.Info("Starting scan")
 		out.Diag(output.LevelVerbose, "Cache hit", nil)
-		out.Diag(output.LevelDebug, "Memory usage", map[string]interface{}{"mb": 42})
+		out.Diag(output.LevelDebug, "Memory usage", map[string]any{"mb": 42})
 
 		// Verify JSON output
 		jsonLines := strings.Split(strings.TrimSpace(stdout.String()), "\n")
 		require.Len(t, jsonLines, 1) // Only info event (diagnostics not in JSON)
 
-		var infoEvent map[string]interface{}
+		var infoEvent map[string]any
 		err := json.Unmarshal([]byte(jsonLines[0]), &infoEvent)
 		require.NoError(t, err)
 		require.Equal(t, "info", infoEvent["type"])

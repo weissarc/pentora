@@ -3,6 +3,8 @@ package engine
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog"
@@ -44,7 +46,7 @@ type DAGPlanner struct {
 
 // ConfigManager is an interface for accessing configuration values.
 type ConfigManager interface {
-	GetValue(key string) interface{}
+	GetValue(key string) any
 }
 
 // NewDAGPlanner creates a new DAGPlanner.
@@ -457,8 +459,8 @@ func (p *DAGPlanner) matchesTags(moduleTags, includeTags, excludeTags []string) 
 // 1. Intent-specific overrides (from CLI flags)
 // 2. Config file values (from vulntor.yaml modules.* section)
 // 3. Module default values (from module schema)
-func (p *DAGPlanner) configureModule(meta ModuleMetadata, intent ScanIntent) map[string]interface{} {
-	cfg := make(map[string]interface{})
+func (p *DAGPlanner) configureModule(meta ModuleMetadata, intent ScanIntent) map[string]any {
+	cfg := make(map[string]any)
 
 	// 1. Apply module defaults from schema (lowest precedence)
 	p.applyModuleDefaults(cfg, meta)
@@ -473,7 +475,7 @@ func (p *DAGPlanner) configureModule(meta ModuleMetadata, intent ScanIntent) map
 }
 
 // applyModuleDefaults applies default values from module schema.
-func (p *DAGPlanner) applyModuleDefaults(cfg map[string]interface{}, meta ModuleMetadata) {
+func (p *DAGPlanner) applyModuleDefaults(cfg map[string]any, meta ModuleMetadata) {
 	for paramName, paramDef := range meta.ConfigSchema {
 		if paramDef.Default != nil {
 			cfg[paramName] = paramDef.Default
@@ -482,7 +484,7 @@ func (p *DAGPlanner) applyModuleDefaults(cfg map[string]interface{}, meta Module
 }
 
 // applyConfigFileValues applies configuration values from config file if available.
-func (p *DAGPlanner) applyConfigFileValues(cfg map[string]interface{}, meta ModuleMetadata) {
+func (p *DAGPlanner) applyConfigFileValues(cfg map[string]any, meta ModuleMetadata) {
 	if p.configManager == nil {
 		return
 	}
@@ -493,14 +495,12 @@ func (p *DAGPlanner) applyConfigFileValues(cfg map[string]interface{}, meta Modu
 		return
 	}
 
-	moduleConfigMap, ok := moduleConfigValue.(map[string]interface{})
+	moduleConfigMap, ok := moduleConfigValue.(map[string]any)
 	if !ok {
 		return
 	}
 
-	for key, value := range moduleConfigMap {
-		cfg[key] = value
-	}
+	maps.Copy(cfg, moduleConfigMap)
 
 	p.logger.Debug().
 		Str("module", meta.Name).
@@ -510,7 +510,7 @@ func (p *DAGPlanner) applyConfigFileValues(cfg map[string]interface{}, meta Modu
 
 // applyIntentOverrides applies CLI flag overrides from scan intent.
 // Only applies when explicitly set by user (non-zero/non-empty values).
-func (p *DAGPlanner) applyIntentOverrides(cfg map[string]interface{}, meta ModuleMetadata, intent ScanIntent) {
+func (p *DAGPlanner) applyIntentOverrides(cfg map[string]any, meta ModuleMetadata, intent ScanIntent) {
 	// Port override (TCP port discovery only)
 	if meta.Name == moduleTypeTCPPortDiscovery && intent.CustomPortConfig != "" {
 		parsedPorts := strings.Split(intent.CustomPortConfig, ",")
@@ -557,12 +557,7 @@ func (p *DAGPlanner) generateInstanceID(moduleName string, existingNodes map[str
 
 // Helper to check if a slice contains a string.
 func containsTag(tags []string, tagToFind string) bool {
-	for _, t := range tags {
-		if t == tagToFind {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(tags, tagToFind)
 }
 
 // Helper to get a meaningful name for the DAG based on intent

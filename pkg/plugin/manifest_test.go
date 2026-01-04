@@ -662,7 +662,7 @@ func TestManifestManager_ConcurrentReadOperations(t *testing.T) {
 	const numReaders = 5
 	done := make(chan bool, numReaders)
 
-	for i := 0; i < numReaders; i++ {
+	for range numReaders {
 		go func() {
 			manager, err := NewManifestManager(manifestPath)
 			if err != nil {
@@ -687,7 +687,7 @@ func TestManifestManager_ConcurrentReadOperations(t *testing.T) {
 	}
 
 	// Wait for all readers
-	for i := 0; i < numReaders; i++ {
+	for range numReaders {
 		require.True(t, <-done)
 	}
 }

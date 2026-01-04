@@ -36,7 +36,7 @@ func (m *MockTestModule) Metadata() ModuleMetadata {
 	return m.meta
 }
 
-func (m *MockTestModule) Init(instanceID string, configMap map[string]interface{}) error {
+func (m *MockTestModule) Init(instanceID string, configMap map[string]any) error {
 	// Simple config parsing for test
 	if val, ok := configMap["TestValue"].(string); ok {
 		m.config.TestValue = val
@@ -48,7 +48,7 @@ func (m *MockTestModule) Init(instanceID string, configMap map[string]interface{
 	return nil
 }
 
-func (m *MockTestModule) Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- ModuleOutput) error {
+func (m *MockTestModule) Execute(ctx context.Context, inputs map[string]any, outputChan chan<- ModuleOutput) error {
 	if !m.inited {
 		return fmt.Errorf("module not initialized")
 	}
@@ -89,7 +89,7 @@ func TestGetModuleInstance_Success(t *testing.T) {
 	moduleName := "test-module-success"
 	RegisterModuleFactory(moduleName, NewMockTestModule)
 
-	config := map[string]interface{}{"TestValue": "hello"}
+	config := map[string]any{"TestValue": "hello"}
 	instance, err := GetModuleInstance("", moduleName, config)
 	if err != nil {
 		t.Fatalf("GetModuleInstance failed: %v", err)
@@ -117,7 +117,7 @@ func TestGetModuleInstance_Success(t *testing.T) {
 
 func TestGetModuleInstance_NotFound(t *testing.T) {
 	resetRegistry()
-	config := map[string]interface{}{"TestValue": "world"}
+	config := map[string]any{"TestValue": "world"}
 	_, err := GetModuleInstance("", "non-existent-module", config)
 
 	if err == nil {
@@ -134,7 +134,7 @@ func TestGetModuleInstance_InitFailure(t *testing.T) {
 	moduleName := "test-module-init-fail"
 	RegisterModuleFactory(moduleName, NewMockTestModule)
 
-	configMissingValue := map[string]interface{}{} // Missing TestValue
+	configMissingValue := map[string]any{} // Missing TestValue
 	_, err := GetModuleInstance("", moduleName, configMissingValue)
 
 	if err == nil {

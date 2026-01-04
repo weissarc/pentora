@@ -2,6 +2,7 @@ package fingerprint
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -132,12 +133,7 @@ func (p ProbeSpec) allowsPort(port int) bool {
 }
 
 func containsInt(list []int, target int) bool {
-	for _, v := range list {
-		if v == target {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(list, target)
 }
 
 func normalizeHints(hints []string) map[string]struct{} {

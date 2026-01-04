@@ -11,6 +11,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -128,7 +129,7 @@ func (m *BannerGrabModule) Metadata() engine.ModuleMetadata {
 }
 
 // Init initializes the module with the given configuration map.
-func (m *BannerGrabModule) Init(instanceID string, configMap map[string]interface{}) error {
+func (m *BannerGrabModule) Init(instanceID string, configMap map[string]any) error {
 	m.logger = log.With().Str("module", m.meta.Name).Str("instance_id", m.meta.ID).Logger()
 
 	cfg := m.config
@@ -188,14 +189,14 @@ type TargetPortData struct {
 // It consumes 'discovery.open_tcp_ports' which should be of type PortStatusInfo.
 //
 //nolint:gocyclo // Complexity inherited from existing implementation
-func (m *BannerGrabModule) Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- engine.ModuleOutput) error {
+func (m *BannerGrabModule) Execute(ctx context.Context, inputs map[string]any, outputChan chan<- engine.ModuleOutput) error {
 	m.logger.Debug().Interface("received_inputs", inputs).Msg("Executing module")
 
 	var scanTasks []TargetPortData
 
 	if rawOpenTCPPorts, ok := inputs["discovery.open_tcp_ports"]; ok {
 		m.logger.Debug().Type("type", rawOpenTCPPorts).Msg("Found 'discovery.open_tcp_ports' in inputs")
-		if openTCPPortsList, listOk := rawOpenTCPPorts.([]interface{}); listOk {
+		if openTCPPortsList, listOk := rawOpenTCPPorts.([]any); listOk {
 			for _, item := range openTCPPortsList {
 				if portResult, castOk := item.(discovery.TCPPortDiscoveryResult); castOk {
 					for _, port := range portResult.OpenPorts {
@@ -651,12 +652,7 @@ func portHintsFromCatalog(catalog *fingerprint.ProbeCatalog, port int) []string 
 }
 
 func portInList(list []int, port int) bool {
-	for _, v := range list {
-		if v == port {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(list, port)
 }
 
 func protocolHintFromBanner(banner string) string {
@@ -762,14 +758,6 @@ func tlsVersionString(version uint16) string {
 // BannerGrabModuleFactory creates a new BannerGrabModule instance.
 func BannerGrabModuleFactory() engine.Module {
 	return newBannerGrabModule()
-}
-
-// min returns the minimum of two integers
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 func init() {

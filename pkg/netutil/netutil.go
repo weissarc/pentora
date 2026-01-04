@@ -83,7 +83,7 @@ func ParseAndExpandTargets(targets []string) []string {
 						if bits == 32 && ones > 0 && ones < 31 {
 							networkIP := ipNet.IP.To4()
 							broadcastIP := make(net.IP, net.IPv4len)
-							for i := 0; i < net.IPv4len; i++ {
+							for i := range net.IPv4len {
 								broadcastIP[i] = (ipNet.IP.To4())[i] | ^(ipNet.Mask)[i]
 							}
 							if ipToAdd.Equal(networkIP) || ipToAdd.Equal(broadcastIP) {
@@ -106,7 +106,7 @@ func ParseAndExpandTargets(targets []string) []string {
 				// to prevent infinite loop on incIP for /0 or specific cases.
 				isLastIP := true
 				if ipToAdd.To4() != nil { // IPv4
-					for i := 0; i < net.IPv4len; i++ {
+					for i := range net.IPv4len {
 						if (ipToAdd[i] | (^ipNet.Mask[i])) != 0xff {
 							isLastIP = false
 							break
@@ -281,8 +281,8 @@ func ParsePortString(portStr string) ([]int, error) {
 	seenPorts := make(map[int]struct{})
 	var ports []int
 
-	parts := strings.Split(portStr, ",")
-	for _, part := range parts {
+	parts := strings.SplitSeq(portStr, ",")
+	for part := range parts {
 		part = strings.TrimSpace(part)
 		if part == "" {
 			continue

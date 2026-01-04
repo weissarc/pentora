@@ -3,6 +3,7 @@ package fingerprint
 import (
 	"context"
 	"os"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -39,7 +40,7 @@ func stringIndexFold(s, sub string) int {
 	}
 	for i := 0; i+lsub <= ls; i++ {
 		ok := true
-		for j := 0; j < lsub; j++ {
+		for j := range lsub {
 			a, b := s[i+j], sub[j]
 			if 'A' <= a && a <= 'Z' {
 				a += 'a' - 'A'
@@ -134,25 +135,26 @@ func writeTempDataset(t *testing.T, ds *ValidationDataset) string {
 	// Serialize minimal YAML by hand to avoid external deps.
 	// Only fields we use in tests are included.
 	// true_negatives require expected_match: false to count as TNs.
-	content := "true_positives:\n"
+	var content strings.Builder
+	content.WriteString("true_positives:\n")
 	for _, tc := range ds.TruePositives {
-		content += "  - protocol: " + tc.Protocol + "\n"
-		content += "    port: " + itoa(tc.Port) + "\n"
-		content += "    banner: \"" + tc.Banner + "\"\n"
+		content.WriteString("  - protocol: " + tc.Protocol + "\n")
+		content.WriteString("    port: " + itoa(tc.Port) + "\n")
+		content.WriteString("    banner: \"" + tc.Banner + "\"\n")
 		if tc.ExpectedProduct != "" {
-			content += "    expected_product: \"" + tc.ExpectedProduct + "\"\n"
+			content.WriteString("    expected_product: \"" + tc.ExpectedProduct + "\"\n")
 		}
 	}
-	content += "true_negatives:\n"
+	content.WriteString("true_negatives:\n")
 	for _, tc := range ds.TrueNegatives {
-		content += "  - protocol: " + tc.Protocol + "\n"
-		content += "    port: " + itoa(tc.Port) + "\n"
-		content += "    banner: \"" + tc.Banner + "\"\n"
-		content += "    expected_match: false\n"
+		content.WriteString("  - protocol: " + tc.Protocol + "\n")
+		content.WriteString("    port: " + itoa(tc.Port) + "\n")
+		content.WriteString("    banner: \"" + tc.Banner + "\"\n")
+		content.WriteString("    expected_match: false\n")
 	}
 
 	f := t.TempDir() + "/dataset.yaml"
-	writeFile(t, f, []byte(content))
+	writeFile(t, f, []byte(content.String()))
 	return f
 }
 

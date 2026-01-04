@@ -14,7 +14,7 @@ func TestBindScanOptions(t *testing.T) {
 	tests := []struct {
 		name    string
 		targets []string
-		flags   map[string]interface{}
+		flags   map[string]any
 		want    scanexec.Params
 		wantErr bool
 		errMsg  string
@@ -22,7 +22,7 @@ func TestBindScanOptions(t *testing.T) {
 		{
 			name:    "all flags set",
 			targets: []string{"192.168.1.0/24"},
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"ports":             "22,80,443",
 				"profile":           "quick",
 				"level":             "comprehensive",
@@ -62,7 +62,7 @@ func TestBindScanOptions(t *testing.T) {
 		{
 			name:    "minimal flags (defaults)",
 			targets: []string{"10.0.0.1"},
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"ports":             "",
 				"profile":           "",
 				"level":             "default",
@@ -102,7 +102,7 @@ func TestBindScanOptions(t *testing.T) {
 		{
 			name:    "only-discover disables vuln automatically",
 			targets: []string{"192.168.1.1"},
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"ports":             "22",
 				"profile":           "",
 				"level":             "default",
@@ -142,7 +142,7 @@ func TestBindScanOptions(t *testing.T) {
 		{
 			name:    "conflicting flags: only-discover + no-discover",
 			targets: []string{"10.0.0.1"},
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"ports":             "",
 				"profile":           "",
 				"level":             "default",
@@ -167,7 +167,7 @@ func TestBindScanOptions(t *testing.T) {
 		{
 			name:    "multiple targets",
 			targets: []string{"10.0.0.1", "10.0.0.2", "192.168.1.0/24"},
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"ports":             "80,443",
 				"profile":           "",
 				"level":             "default",
@@ -207,7 +207,7 @@ func TestBindScanOptions(t *testing.T) {
 		{
 			name:    "skip-discover with vuln enabled",
 			targets: []string{"192.168.1.100"},
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"ports":             "1-1000",
 				"profile":           "",
 				"level":             "default",
@@ -284,7 +284,7 @@ func TestBindScanOptions(t *testing.T) {
 }
 
 // setupScanCommand creates a mock command with scan flags
-func setupScanCommand(flags map[string]interface{}) *cobra.Command {
+func setupScanCommand(flags map[string]any) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Flags().String("ports", "", "Ports")
 	cmd.Flags().String("profile", "", "Profile")

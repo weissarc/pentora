@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -226,13 +227,7 @@ func (d *Downloader) DownloadByCategory(ctx context.Context, category Category) 
 
 		// Find plugins in this category
 		for _, plugin := range manifest.Plugins {
-			hasCategory := false
-			for _, cat := range plugin.Categories {
-				if cat == category {
-					hasCategory = true
-					break
-				}
-			}
+			hasCategory := slices.Contains(plugin.Categories, category)
 
 			if !hasCategory {
 				continue

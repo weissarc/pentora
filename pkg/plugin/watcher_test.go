@@ -572,7 +572,7 @@ func TestManifestWatcher_DebounceTimerCancellation(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	// Trigger multiple rapid changes to test timer cancellation
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		content := `{"version":"1.0","plugins":{"plugin-` + string(rune(i+48)) + `":{"id":"plugin-` + string(rune(i+48)) + `","name":"Test","version":"1.0.0","category":"test"}},"last_updated":"2025-01-01T02:00:00Z"}`
 
 		err = os.WriteFile(manifestPath, []byte(content), 0o644)

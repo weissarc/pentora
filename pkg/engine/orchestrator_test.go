@@ -14,14 +14,14 @@ import (
 type mockModule struct {
 	meta     ModuleMetadata
 	initErr  error
-	execFunc func(context.Context, map[string]interface{}, chan<- ModuleOutput) error
+	execFunc func(context.Context, map[string]any, chan<- ModuleOutput) error
 }
 
 func (m *mockModule) Metadata() ModuleMetadata { return m.meta }
 
-func (m *mockModule) Init(instanceID string, config map[string]interface{}) error { return m.initErr }
+func (m *mockModule) Init(instanceID string, config map[string]any) error { return m.initErr }
 
-func (m *mockModule) Execute(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+func (m *mockModule) Execute(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 	if m.execFunc != nil {
 		return m.execFunc(ctx, inputs, out)
 	}
@@ -77,7 +77,7 @@ func TestDataContext_Set(t *testing.T) {
 	if !exists {
 		t.Errorf("Expected key %q to exist in DataContext.data", key)
 	}
-	if got.([]interface{})[0] != value {
+	if got.([]any)[0] != value {
 		t.Errorf("Expected value %q for key %q, got %q", value, key, got)
 	}
 }
@@ -97,7 +97,7 @@ func TestDataContext_Set_Overwrite(t *testing.T) {
 	if !exists {
 		t.Errorf("Expected key %q to exist in DataContext.data", key)
 	}
-	if reflect.DeepEqual(got, []interface{}{value1, value2}) == false {
+	if reflect.DeepEqual(got, []any{value1, value2}) == false {
 		t.Errorf("Expected value %q, %q for key %q after overwrite, got %q", value1, value2, key, got)
 	}
 }
@@ -122,7 +122,7 @@ func TestDataContext_Get(t *testing.T) {
 	if !exists {
 		t.Errorf("Expected key %q to exist after Set, but exists=false", key)
 	}
-	if got.([]interface{})[0] != value {
+	if got.([]any)[0] != value {
 		t.Errorf("Expected value %q for key %q, got %v", value, key, got)
 	}
 
@@ -163,13 +163,13 @@ func TestDataContext_GetAll_NonEmpty(t *testing.T) {
 		t.Errorf("Expected map of length 3, got %d", len(all))
 	}
 
-	if !reflect.DeepEqual(all["key1"], []interface{}{key1Val}) {
+	if !reflect.DeepEqual(all["key1"], []any{key1Val}) {
 		t.Errorf("Expected key1 to be '%s', got '%s'", key1Val, all["key1"])
 	}
-	if !reflect.DeepEqual(all["key2"], []interface{}{key2val}) {
+	if !reflect.DeepEqual(all["key2"], []any{key2val}) {
 		t.Errorf("Expected key2 to be 42, got %v", all["key2"])
 	}
-	if !reflect.DeepEqual(all["key3"], []interface{}{key3Val}) {
+	if !reflect.DeepEqual(all["key3"], []any{key3Val}) {
 		t.Errorf("Expected key3 to be %v, got %v", key3Val, all["key3"])
 	}
 }
@@ -181,7 +181,7 @@ func TestDataContext_GetAll_Independence(t *testing.T) {
 	all["k"] = "changed"
 
 	got, _ := dc.Get("k")
-	if !reflect.DeepEqual(got, []interface{}{"v"}) {
+	if !reflect.DeepEqual(got, []any{"v"}) {
 		t.Errorf("Modifying GetAll() result should not affect DataContext, but got %v", got)
 	}
 }
@@ -208,7 +208,7 @@ func TestNewOrchestrator_MissingInstanceID(t *testing.T) {
 			{
 				InstanceID: "",
 				ModuleType: "mock",
-				Config:     map[string]interface{}{},
+				Config:     map[string]any{},
 			},
 		},
 	}
@@ -232,7 +232,7 @@ func TestNewOrchestrator_DuplicateInstanceID(t *testing.T) {
 					{Key: "mock.input"},
 				},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				out <- ModuleOutput{
 					DataKey: "mock.output",
 					Data:    "hello world",
@@ -252,12 +252,12 @@ func TestNewOrchestrator_DuplicateInstanceID(t *testing.T) {
 			{
 				InstanceID: "mod1",
 				ModuleType: "mock",
-				Config:     map[string]interface{}{},
+				Config:     map[string]any{},
 			},
 			{
 				InstanceID: "mod1",
 				ModuleType: "mock",
-				Config:     map[string]interface{}{},
+				Config:     map[string]any{},
 			},
 		},
 	}
@@ -277,7 +277,7 @@ func TestNewOrchestrator_FailedToCreateModuleInstance(t *testing.T) {
 			{
 				InstanceID: instanceID,
 				ModuleType: moduleType,
-				Config:     map[string]interface{}{},
+				Config:     map[string]any{},
 			},
 		},
 	}
@@ -332,8 +332,8 @@ func TestOrchestrator_ConnectsModulesByConsumesAndProduces(t *testing.T) {
 	dag := &DAGDefinition{
 		Name: "test-dag",
 		Nodes: []DAGNodeConfig{
-			{InstanceID: "modA", ModuleType: "mock-a", Config: map[string]interface{}{}},
-			{InstanceID: "modB", ModuleType: "mock-b", Config: map[string]interface{}{}},
+			{InstanceID: "modA", ModuleType: "mock-a", Config: map[string]any{}},
+			{InstanceID: "modB", ModuleType: "mock-b", Config: map[string]any{}},
 		},
 	}
 
@@ -366,7 +366,7 @@ func TestOrchestrator_Run_ExecutesModulesInOrder(t *testing.T) {
 				Name:     "mock-producer",
 				Produces: []DataContractEntry{{Key: "foo"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				out <- ModuleOutput{
 					DataKey: "foo",
 					Data:    "bar",
@@ -384,8 +384,8 @@ func TestOrchestrator_Run_ExecutesModulesInOrder(t *testing.T) {
 				Consumes: []DataContractEntry{{Key: "foo"}},
 				Produces: []DataContractEntry{{Key: "baz"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
-				if val, ok := inputs["foo"]; !ok || !reflect.DeepEqual(val, []interface{}{"bar"}) {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
+				if val, ok := inputs["foo"]; !ok || !reflect.DeepEqual(val, []any{"bar"}) {
 					t.Errorf("Expected input 'foo' = 'bar', got %v", val)
 				}
 				out <- ModuleOutput{
@@ -405,8 +405,8 @@ func TestOrchestrator_Run_ExecutesModulesInOrder(t *testing.T) {
 	dag := &DAGDefinition{
 		Name: "test-run",
 		Nodes: []DAGNodeConfig{
-			{InstanceID: "mod1", ModuleType: "mock-producer", Config: map[string]interface{}{}},
-			{InstanceID: "mod2", ModuleType: "mock-consumer", Config: map[string]interface{}{}},
+			{InstanceID: "mod1", ModuleType: "mock-producer", Config: map[string]any{}},
+			{InstanceID: "mod2", ModuleType: "mock-consumer", Config: map[string]any{}},
 		},
 	}
 
@@ -421,9 +421,9 @@ func TestOrchestrator_Run_ExecutesModulesInOrder(t *testing.T) {
 	}
 
 	// Check final results
-	want := map[string]interface{}{
-		"foo": []interface{}{"bar"},
-		"baz": []interface{}{"qux"},
+	want := map[string]any{
+		"foo": []any{"bar"},
+		"baz": []any{"qux"},
 	}
 
 	if !reflect.DeepEqual(results, want) {
@@ -443,7 +443,7 @@ func TestOrchestrator_Run_ExplicitDependencies(t *testing.T) {
 				Type: ScanModuleType,
 				// No explicit Consumes/Produces - testing pure explicit dependencies
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				orderMutex.Lock()
 				executionOrder = append(executionOrder, "mod1")
 				orderMutex.Unlock()
@@ -459,7 +459,7 @@ func TestOrchestrator_Run_ExplicitDependencies(t *testing.T) {
 				Name: "explicit-mod2",
 				Type: ScanModuleType,
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				orderMutex.Lock()
 				executionOrder = append(executionOrder, "mod2")
 				orderMutex.Unlock()
@@ -475,7 +475,7 @@ func TestOrchestrator_Run_ExplicitDependencies(t *testing.T) {
 				Name: "explicit-mod3",
 				Type: ScanModuleType,
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				orderMutex.Lock()
 				executionOrder = append(executionOrder, "mod3")
 				orderMutex.Unlock()
@@ -495,13 +495,13 @@ func TestOrchestrator_Run_ExplicitDependencies(t *testing.T) {
 	dag := &DAGDefinition{
 		Name: "explicit-deps-test",
 		Nodes: []DAGNodeConfig{
-			{InstanceID: "mod1", ModuleType: "explicit-mod1", Config: map[string]interface{}{}},
-			{InstanceID: "mod2", ModuleType: "explicit-mod2", Config: map[string]interface{}{}},
+			{InstanceID: "mod1", ModuleType: "explicit-mod1", Config: map[string]any{}},
+			{InstanceID: "mod2", ModuleType: "explicit-mod2", Config: map[string]any{}},
 			{
 				InstanceID: "mod3",
 				ModuleType: "explicit-mod3",
-				Config: map[string]interface{}{
-					"__depends_on": []interface{}{"mod1", "mod2"},
+				Config: map[string]any{
+					"__depends_on": []any{"mod1", "mod2"},
 				},
 			},
 		},
@@ -536,7 +536,7 @@ func TestOrchestrator_Run_LayeredParallelExecution(t *testing.T) {
 				Type:     ScanModuleType,
 				Produces: []DataContractEntry{{Key: "layer1.data1"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				layer1Start <- "mod1"
 				time.Sleep(50 * time.Millisecond) // Simulate work
 				out <- ModuleOutput{DataKey: "layer1.data1", Data: "value1"}
@@ -553,7 +553,7 @@ func TestOrchestrator_Run_LayeredParallelExecution(t *testing.T) {
 				Type:     ScanModuleType,
 				Produces: []DataContractEntry{{Key: "layer1.data2"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				layer1Start <- "mod2"
 				time.Sleep(50 * time.Millisecond) // Simulate work
 				out <- ModuleOutput{DataKey: "layer1.data2", Data: "value2"}
@@ -570,7 +570,7 @@ func TestOrchestrator_Run_LayeredParallelExecution(t *testing.T) {
 				Type:     EvaluationModuleType,
 				Consumes: []DataContractEntry{{Key: "layer1.data1"}, {Key: "layer1.data2"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				layer2Start <- "mod3"
 				return nil
 			},
@@ -586,9 +586,9 @@ func TestOrchestrator_Run_LayeredParallelExecution(t *testing.T) {
 	dag := &DAGDefinition{
 		Name: "parallel-layers-test",
 		Nodes: []DAGNodeConfig{
-			{InstanceID: "mod1", ModuleType: "parallel-mod1", Config: map[string]interface{}{}},
-			{InstanceID: "mod2", ModuleType: "parallel-mod2", Config: map[string]interface{}{}},
-			{InstanceID: "mod3", ModuleType: "parallel-mod3", Config: map[string]interface{}{}},
+			{InstanceID: "mod1", ModuleType: "parallel-mod1", Config: map[string]any{}},
+			{InstanceID: "mod2", ModuleType: "parallel-mod2", Config: map[string]any{}},
+			{InstanceID: "mod3", ModuleType: "parallel-mod3", Config: map[string]any{}},
 		},
 	}
 
@@ -628,7 +628,7 @@ func TestOrchestrator_Run_FailurePropagation(t *testing.T) {
 				Type:     ScanModuleType,
 				Produces: []DataContractEntry{{Key: "fail.data"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				return fmt.Errorf("intentional failure in mod1")
 			},
 		}
@@ -641,7 +641,7 @@ func TestOrchestrator_Run_FailurePropagation(t *testing.T) {
 				Type:     EvaluationModuleType,
 				Consumes: []DataContractEntry{{Key: "fail.data"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				mod2Executed = true
 				return nil
 			},
@@ -656,8 +656,8 @@ func TestOrchestrator_Run_FailurePropagation(t *testing.T) {
 	dag := &DAGDefinition{
 		Name: "failure-propagation-test",
 		Nodes: []DAGNodeConfig{
-			{InstanceID: "mod1", ModuleType: "fail-mod1", Config: map[string]interface{}{}},
-			{InstanceID: "mod2", ModuleType: "fail-mod2", Config: map[string]interface{}{}},
+			{InstanceID: "mod1", ModuleType: "fail-mod1", Config: map[string]any{}},
+			{InstanceID: "mod2", ModuleType: "fail-mod2", Config: map[string]any{}},
 		},
 	}
 
@@ -685,7 +685,7 @@ func TestOrchestrator_Run_ContextCancellation(t *testing.T) {
 				Type:     ScanModuleType,
 				Produces: []DataContractEntry{{Key: "cancel.data"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				close(mod1Started)
 				select {
 				case <-ctx.Done():
@@ -707,7 +707,7 @@ func TestOrchestrator_Run_ContextCancellation(t *testing.T) {
 	dag := &DAGDefinition{
 		Name: "context-cancellation-test",
 		Nodes: []DAGNodeConfig{
-			{InstanceID: "mod1", ModuleType: "cancel-mod1", Config: map[string]interface{}{}},
+			{InstanceID: "mod1", ModuleType: "cancel-mod1", Config: map[string]any{}},
 		},
 	}
 
@@ -760,7 +760,7 @@ func TestOrchestrator_Run_SequentialExecution(t *testing.T) {
 						return []DataContractEntry{{Key: fmt.Sprintf("seq.data%d", modNum-1)}}
 					}(),
 				},
-				execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+				execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 					orderMutex.Lock()
 					executionOrder = append(executionOrder, fmt.Sprintf("mod%d", modNum))
 					orderMutex.Unlock()
@@ -780,10 +780,10 @@ func TestOrchestrator_Run_SequentialExecution(t *testing.T) {
 	dag := &DAGDefinition{
 		Name: "sequential-execution-test",
 		Nodes: []DAGNodeConfig{
-			{InstanceID: "mod1", ModuleType: "seq-mod1", Config: map[string]interface{}{}},
-			{InstanceID: "mod2", ModuleType: "seq-mod2", Config: map[string]interface{}{}},
-			{InstanceID: "mod3", ModuleType: "seq-mod3", Config: map[string]interface{}{}},
-			{InstanceID: "mod4", ModuleType: "seq-mod4", Config: map[string]interface{}{}},
+			{InstanceID: "mod1", ModuleType: "seq-mod1", Config: map[string]any{}},
+			{InstanceID: "mod2", ModuleType: "seq-mod2", Config: map[string]any{}},
+			{InstanceID: "mod3", ModuleType: "seq-mod3", Config: map[string]any{}},
+			{InstanceID: "mod4", ModuleType: "seq-mod4", Config: map[string]any{}},
 		},
 	}
 
@@ -809,7 +809,7 @@ func TestOrchestrator_Run_DiamondPattern(t *testing.T) {
 				Type:     ScanModuleType,
 				Produces: []DataContractEntry{{Key: "diamond.root"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				orderMutex.Lock()
 				executionOrder = append(executionOrder, "root")
 				orderMutex.Unlock()
@@ -827,7 +827,7 @@ func TestOrchestrator_Run_DiamondPattern(t *testing.T) {
 				Consumes: []DataContractEntry{{Key: "diamond.root"}},
 				Produces: []DataContractEntry{{Key: "diamond.left"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				orderMutex.Lock()
 				executionOrder = append(executionOrder, "left")
 				orderMutex.Unlock()
@@ -845,7 +845,7 @@ func TestOrchestrator_Run_DiamondPattern(t *testing.T) {
 				Consumes: []DataContractEntry{{Key: "diamond.root"}},
 				Produces: []DataContractEntry{{Key: "diamond.right"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				orderMutex.Lock()
 				executionOrder = append(executionOrder, "right")
 				orderMutex.Unlock()
@@ -863,7 +863,7 @@ func TestOrchestrator_Run_DiamondPattern(t *testing.T) {
 				Consumes: []DataContractEntry{{Key: "diamond.left"}, {Key: "diamond.right"}},
 				Produces: []DataContractEntry{{Key: "diamond.merged"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				orderMutex.Lock()
 				executionOrder = append(executionOrder, "merge")
 				orderMutex.Unlock()
@@ -883,10 +883,10 @@ func TestOrchestrator_Run_DiamondPattern(t *testing.T) {
 	dag := &DAGDefinition{
 		Name: "diamond-pattern-test",
 		Nodes: []DAGNodeConfig{
-			{InstanceID: "root", ModuleType: "diamond-root", Config: map[string]interface{}{}},
-			{InstanceID: "left", ModuleType: "diamond-left", Config: map[string]interface{}{}},
-			{InstanceID: "right", ModuleType: "diamond-right", Config: map[string]interface{}{}},
-			{InstanceID: "merge", ModuleType: "diamond-merge", Config: map[string]interface{}{}},
+			{InstanceID: "root", ModuleType: "diamond-root", Config: map[string]any{}},
+			{InstanceID: "left", ModuleType: "diamond-left", Config: map[string]any{}},
+			{InstanceID: "right", ModuleType: "diamond-right", Config: map[string]any{}},
+			{InstanceID: "merge", ModuleType: "diamond-merge", Config: map[string]any{}},
 		},
 	}
 
@@ -929,7 +929,7 @@ func TestDataContext_AddOrAppendToList_PromotesNonList(t *testing.T) {
 	dc.AddOrAppendToList("weird.key", 123)
 	got, ok := dc.Get("weird.key")
 	require.True(t, ok)
-	require.Equal(t, []interface{}{"non-list", 123}, got)
+	require.Equal(t, []any{"non-list", 123}, got)
 }
 
 func TestStatus_String_OutOfRangePanicRecovery(t *testing.T) {
@@ -948,7 +948,7 @@ func TestOrchestrator_ExplicitDependencyNotFound_WarningPath(t *testing.T) {
 				Name: "warn-mod",
 				Type: ScanModuleType,
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				return nil
 			},
 		}
@@ -961,8 +961,8 @@ func TestOrchestrator_ExplicitDependencyNotFound_WarningPath(t *testing.T) {
 			{
 				InstanceID: "mod1",
 				ModuleType: "warn-mod",
-				Config: map[string]interface{}{
-					"__depends_on": []interface{}{"nonexistent"},
+				Config: map[string]any{
+					"__depends_on": []any{"nonexistent"},
 				},
 			},
 		},
@@ -980,7 +980,7 @@ func TestOrchestrator_Run_ModulePanicRecovery(t *testing.T) {
 				Type:     ScanModuleType,
 				Produces: []DataContractEntry{{Key: "panic.data"}},
 			},
-			execFunc: func(ctx context.Context, inputs map[string]interface{}, out chan<- ModuleOutput) error {
+			execFunc: func(ctx context.Context, inputs map[string]any, out chan<- ModuleOutput) error {
 				panic("simulated panic in module")
 			},
 		}
@@ -990,7 +990,7 @@ func TestOrchestrator_Run_ModulePanicRecovery(t *testing.T) {
 	dag := &DAGDefinition{
 		Name: "panic-recovery-test",
 		Nodes: []DAGNodeConfig{
-			{InstanceID: "mod1", ModuleType: "panic-mod", Config: map[string]interface{}{}},
+			{InstanceID: "mod1", ModuleType: "panic-mod", Config: map[string]any{}},
 		},
 	}
 

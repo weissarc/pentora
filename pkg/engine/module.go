@@ -84,7 +84,7 @@ type ParameterDefinition struct {
 	Description string
 	Type        string // e.g., "string", "int", "bool", "duration", "[]string"
 	Required    bool
-	Default     interface{}
+	Default     any
 }
 
 // ModuleOutput represents the data produced by a module's execution.
@@ -96,7 +96,7 @@ type ModuleOutput struct {
 	// e.g., "discovery.live_hosts", "service.banner.ssh", "vulnerability.CVE-2021-44228"
 	DataKey string
 	// Data is the actual payload.
-	Data interface{}
+	Data any
 	// Error if the module execution failed for this specific output.
 	Error error
 	// Timestamp when the data was produced.
@@ -112,12 +112,12 @@ type Module interface {
 
 	// Init initializes the module with its specific configuration.
 	// The config map is typically derived from the DAG definition.
-	Init(instanceID string, moduleConfig map[string]interface{}) error
+	Init(instanceID string, moduleConfig map[string]any) error
 
 	// Execute runs the module's main logic.
 	// It takes the current execution context, a map of input data (keyed by DataKey),
 	// and a channel to send its outputs.
-	Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- ModuleOutput) error
+	Execute(ctx context.Context, inputs map[string]any, outputChan chan<- ModuleOutput) error
 }
 
 // ModuleLifecycle is an optional lifecycle interface that a Module can implement

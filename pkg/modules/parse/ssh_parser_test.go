@@ -19,8 +19,8 @@ func buildSSHParser(t *testing.T) *SSHParserModule {
 
 func TestSSHParser_Execute_WithValidBanner(t *testing.T) {
 	m := buildSSHParser(t)
-	inputs := map[string]interface{}{
-		"service.banner.tcp": []interface{}{
+	inputs := map[string]any{
+		"service.banner.tcp": []any{
 			scan.BannerGrabResult{IP: "127.0.0.1", Port: 22, Protocol: "tcp", Banner: "SSH-2.0-OpenSSH_9.0"},
 		},
 	}
@@ -35,8 +35,8 @@ func TestSSHParser_Execute_WithValidBanner(t *testing.T) {
 
 func TestSSHParser_Execute_WrongItemType(t *testing.T) {
 	m := buildSSHParser(t)
-	inputs := map[string]interface{}{
-		"service.banner.tcp": []interface{}{[]scan.BannerGrabResult{}},
+	inputs := map[string]any{
+		"service.banner.tcp": []any{[]scan.BannerGrabResult{}},
 	}
 	outCh := make(chan engine.ModuleOutput, 3)
 	defer close(outCh)
@@ -122,7 +122,7 @@ func TestSSHParser_Execute_ParsesValidBanners(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			m := buildSSHParser(t)
-			inputs := map[string]interface{}{
+			inputs := map[string]any{
 				"service.banner.tcp": tc.banners,
 			}
 			// Each banner produces 3 outputs: service.ssh.details, ssh.banner, ssh.version
@@ -178,7 +178,7 @@ func TestSSHParser_Execute_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // Cancel immediately
 
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"service.banner.tcp": []scan.BannerGrabResult{
 			{IP: "192.168.1.1", Port: 22, Banner: "SSH-2.0-OpenSSH_8.2p1"},
 		},
@@ -230,7 +230,7 @@ func TestExtractSSHSoftwareAndVersion(t *testing.T) {
 
 func TestSSHParser_Execute_MissingInputKey(t *testing.T) {
 	m := buildSSHParser(t)
-	inputs := map[string]interface{}{} // no service.banner.tcp key
+	inputs := map[string]any{} // no service.banner.tcp key
 
 	outCh := make(chan engine.ModuleOutput, 3)
 	defer close(outCh)
@@ -243,7 +243,7 @@ func TestSSHParser_Execute_MissingInputKey(t *testing.T) {
 func TestSSHParser_Execute_InputWrongType(t *testing.T) {
 	m := buildSSHParser(t)
 	// Provide a non-list type for the expected key
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"service.banner.tcp": 12345,
 	}
 
@@ -257,8 +257,8 @@ func TestSSHParser_Execute_InputWrongType(t *testing.T) {
 
 func TestSSHParser_Execute_ParsesSoftwareVersionProperly(t *testing.T) {
 	m := buildSSHParser(t)
-	inputs := map[string]interface{}{
-		"service.banner.tcp": []interface{}{
+	inputs := map[string]any{
+		"service.banner.tcp": []any{
 			scan.BannerGrabResult{IP: "10.0.0.5", Port: 22, Banner: "SSH-2.0-OpenSSH_9.0"},
 		},
 	}
@@ -302,7 +302,7 @@ func TestSSHParser_Execute_ParsesSoftwareVersionProperly(t *testing.T) {
 func TestSSHParser_Execute_TypedSliceInput(t *testing.T) {
 	m := buildSSHParser(t)
 	// Provide the typed slice []scan.BannerGrabResult instead of []interface{}
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"service.banner.tcp": []scan.BannerGrabResult{
 			{IP: "1.2.3.4", Port: 22, Banner: "SSH-2.0-Dropbear_2020.78"},
 		},

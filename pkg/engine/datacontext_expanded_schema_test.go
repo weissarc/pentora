@@ -54,7 +54,7 @@ func TestRegisterCommonSchema_SimpleParseKeys(t *testing.T) {
 
 	tests := []struct {
 		key   string
-		value interface{}
+		value any
 	}{
 		{"ssh.banner", "SSH-2.0-OpenSSH_8.9p1"},
 		{"ssh.version", "8.9p1"},
@@ -125,5 +125,5 @@ func TestRegisterCommonSchema_LegacyFallback(t *testing.T) {
 
 	got, ok := dc.Get("custom.unregistered.key")
 	require.True(t, ok)
-	require.Equal(t, []interface{}{"value1", "value2"}, got)
+	require.Equal(t, []any{"value1", "value2"}, got)
 }

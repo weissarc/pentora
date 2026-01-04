@@ -125,7 +125,7 @@ func (m *SSHParserModule) Metadata() engine.ModuleMetadata {
 }
 
 // Init initializes the module with its instance ID and configuration.
-func (m *SSHParserModule) Init(instanceID string, configMap map[string]interface{}) error {
+func (m *SSHParserModule) Init(instanceID string, configMap map[string]any) error {
 	m.meta.ID = instanceID
 	m.logger.Debug().Interface("received_config_map", configMap).Msg("Initializing module (no specific config for ssh-parser)")
 	// No config parameters to parse from configMap for now for this simple parser
@@ -136,7 +136,7 @@ func (m *SSHParserModule) Init(instanceID string, configMap map[string]interface
 // Execute parses SSH banners.
 //
 //nolint:gocyclo // Complexity is inherent to banner parsing logic
-func (m *SSHParserModule) Execute(ctx context.Context, inputs map[string]interface{}, outputChan chan<- engine.ModuleOutput) error {
+func (m *SSHParserModule) Execute(ctx context.Context, inputs map[string]any, outputChan chan<- engine.ModuleOutput) error {
 	// Extract Output interface for real-time SSH service detection
 	out, _ := ctx.Value(output.OutputKey).(output.Output)
 
@@ -146,7 +146,7 @@ func (m *SSHParserModule) Execute(ctx context.Context, inputs map[string]interfa
 		return nil // Not an error for this module, just no relevant input
 	}
 
-	bannerList, listOk := rawBannerInput.([]interface{})
+	bannerList, listOk := rawBannerInput.([]any)
 	if !listOk {
 		if typed, ok := rawBannerInput.([]scan.BannerGrabResult); ok {
 			for _, item := range typed {

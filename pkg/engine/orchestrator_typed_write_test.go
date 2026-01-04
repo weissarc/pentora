@@ -12,15 +12,15 @@ import (
 type minimalTestModule struct {
 	meta    ModuleMetadata
 	outKey  string
-	outData interface{}
+	outData any
 }
 
 func (m *minimalTestModule) Metadata() ModuleMetadata { return m.meta }
-func (m *minimalTestModule) Init(instanceID string, moduleConfig map[string]interface{}) error {
+func (m *minimalTestModule) Init(instanceID string, moduleConfig map[string]any) error {
 	return nil
 }
 
-func (m *minimalTestModule) Execute(ctx context.Context, inputs map[string]interface{}, ch chan<- ModuleOutput) error {
+func (m *minimalTestModule) Execute(ctx context.Context, inputs map[string]any, ch chan<- ModuleOutput) error {
 	ch <- ModuleOutput{DataKey: m.outKey, Data: m.outData}
 	return nil
 }
@@ -47,11 +47,11 @@ func TestOrchestrator_TypedWrite_ListAppendWhenSchemaRegistered(t *testing.T) {
 	require.NoError(t, err)
 
 	// Pre-register schema for list key: []string
-	err = orc.dataCtx.RegisterType("service.banner.tcp", reflect.TypeOf([]string{}), CardinalityList)
+	err = orc.dataCtx.RegisterType("service.banner.tcp", reflect.TypeFor[[]string](), CardinalityList)
 	require.NoError(t, err)
 
 	// Provide initial inputs to exercise typed seeding path as well
-	_, runErr := orc.Run(context.Background(), map[string]interface{}{"config.targets": []string{"10.0.0.1"}})
+	_, runErr := orc.Run(context.Background(), map[string]any{"config.targets": []string{"10.0.0.1"}})
 	require.NoError(t, runErr)
 
 	v, err := orc.dataCtx.GetValue("service.banner.tcp")
@@ -82,7 +82,7 @@ func TestOrchestrator_TypedWrite_SinglePublishWhenSchemaRegistered(t *testing.T)
 	require.NoError(t, err)
 
 	// Register schema for single key: []string
-	err = orc.dataCtx.RegisterType("config.targets", reflect.TypeOf([]string{}), CardinalitySingle)
+	err = orc.dataCtx.RegisterType("config.targets", reflect.TypeFor[[]string](), CardinalitySingle)
 	require.NoError(t, err)
 
 	_, runErr := orc.Run(context.Background(), nil)
@@ -117,7 +117,7 @@ func TestOrchestrator_TypedWrite_FallbackWhenUnregistered(t *testing.T) {
 	all := orc.dataCtx.GetAll()
 	v, ok := all["unregistered.key"]
 	require.True(t, ok)
-	list, ok := v.([]interface{})
+	list, ok := v.([]any)
 	require.True(t, ok)
 	require.Len(t, list, 1)
 	require.Equal(t, 123, list[0])

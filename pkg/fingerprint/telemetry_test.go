@@ -109,7 +109,7 @@ func TestTelemetryWriter_Write(t *testing.T) {
 		defer writer.Close()
 
 		// Write multiple events
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			event := DetectionEvent{
 				Timestamp:    time.Now(),
 				Target:       "192.168.1.1",
@@ -285,7 +285,7 @@ func TestTelemetryWriter_ThreadSafety(t *testing.T) {
 
 	// Write events concurrently
 	done := make(chan bool)
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		go func(port int) {
 			event := DetectionEvent{
 				Timestamp:    time.Now(),
@@ -302,7 +302,7 @@ func TestTelemetryWriter_ThreadSafety(t *testing.T) {
 	}
 
 	// Wait for all goroutines to complete
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		<-done
 	}
 

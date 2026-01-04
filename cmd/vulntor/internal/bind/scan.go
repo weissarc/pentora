@@ -79,7 +79,7 @@ func BindScanOptions(cmd *cobra.Command, targets []string) (scanexec.Params, err
 	}
 
 	// Store additional flags in RawInputs for potential use
-	params.RawInputs = map[string]interface{}{
+	params.RawInputs = map[string]any{
 		"progress":          progress,
 		"fingerprint-cache": fingerprintCache,
 	}

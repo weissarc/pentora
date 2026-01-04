@@ -2,6 +2,7 @@ package fingerprint
 
 import (
 	"regexp"
+	"slices"
 	"strings"
 )
 
@@ -66,10 +67,5 @@ func normalizeVersion(s string) string {
 
 // containsInt checks if a target port is present in a slice.
 func containsPort(ports []int, p int) bool {
-	for _, v := range ports {
-		if v == p {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(ports, p)
 }

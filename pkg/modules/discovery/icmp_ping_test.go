@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -36,7 +37,7 @@ func (f *fakePinger) GetTimeout() time.Duration    { return f.timeout }
 
 func TestICMPPingDiscoveryModule_Init(t *testing.T) {
 	mod := newICMPPingDiscoveryModule() // Use internal constructor
-	config := map[string]interface{}{
+	config := map[string]any{
 		"targets":        []string{"127.0.0.1", "192.168.1.0/24"},
 		"timeout":        "500ms",
 		"count":          2,
@@ -70,7 +71,7 @@ func TestICMPPingDiscoveryModule_Init(t *testing.T) {
 
 	// Test with missing optional fields to check defaults
 	modDefaults := newICMPPingDiscoveryModule()
-	configDefaults := map[string]interface{}{
+	configDefaults := map[string]any{
 		"targets":        []string{"127.0.0.1"},
 		"allow_loopback": false,
 	}
@@ -85,7 +86,7 @@ func TestICMPPingDiscoveryModule_Init(t *testing.T) {
 
 func TestICMPPingDiscoveryModule_Init_InvalidTimeout(t *testing.T) {
 	mod := newICMPPingDiscoveryModule()
-	err := mod.Init("instanceId", map[string]interface{}{
+	err := mod.Init("instanceId", map[string]any{
 		"timeout": "not-a-duration",
 	})
 	if err != nil {
@@ -95,7 +96,7 @@ func TestICMPPingDiscoveryModule_Init_InvalidTimeout(t *testing.T) {
 
 func TestICMPPingDiscoveryModule_Init_InvalidPacketTimeout(t *testing.T) {
 	mod := newICMPPingDiscoveryModule()
-	err := mod.Init("instanceId", map[string]interface{}{
+	err := mod.Init("instanceId", map[string]any{
 		"packet_timeout": "not-a-duration",
 	})
 	if err != nil {
@@ -105,7 +106,7 @@ func TestICMPPingDiscoveryModule_Init_InvalidPacketTimeout(t *testing.T) {
 
 func TestICMPPingDiscoveryModule_Init_InvalidInternal(t *testing.T) {
 	mod := newICMPPingDiscoveryModule()
-	err := mod.Init("instanceId", map[string]interface{}{
+	err := mod.Init("instanceId", map[string]any{
 		"interval": "not-an-interval",
 	})
 	if err != nil {
@@ -115,7 +116,7 @@ func TestICMPPingDiscoveryModule_Init_InvalidInternal(t *testing.T) {
 
 func TestICMPPingDiscoveryModule_Init_CountLessThanOne(t *testing.T) {
 	mod := newICMPPingDiscoveryModule()
-	err := mod.Init("instanceId", map[string]interface{}{
+	err := mod.Init("instanceId", map[string]any{
 		"targets": []string{"192.168.1.1"},
 		"count":   0,
 	})
@@ -129,7 +130,7 @@ func TestICMPPingDiscoveryModule_Init_CountLessThanOne(t *testing.T) {
 
 func TestICMPPingDiscoveryModule_Init_ConcurrencyLessThanOne(t *testing.T) {
 	mod := newICMPPingDiscoveryModule()
-	err := mod.Init("instanceId", map[string]interface{}{
+	err := mod.Init("instanceId", map[string]any{
 		"targets":     []string{"192.168.1.1"},
 		"concurrency": 0,
 	})
@@ -143,7 +144,7 @@ func TestICMPPingDiscoveryModule_Init_ConcurrencyLessThanOne(t *testing.T) {
 
 func TestICMPPingDiscoveryModule_Init_PacketTimeoutLessThanOne(t *testing.T) {
 	mod := newICMPPingDiscoveryModule()
-	err := mod.Init("instanceId", map[string]interface{}{
+	err := mod.Init("instanceId", map[string]any{
 		"targets":        []string{"192.168.1.1"},
 		"packet_timeout": -1,
 	})
@@ -158,7 +159,7 @@ func TestICMPPingDiscoveryModule_Init_PacketTimeoutLessThanOne(t *testing.T) {
 func TestICMPPingDiscoveryModule_Init_InvalidConfigParams(t *testing.T) {
 	timeout := "0s"
 	mod := newICMPPingDiscoveryModule()
-	err := mod.Init("instanceId", map[string]interface{}{
+	err := mod.Init("instanceId", map[string]any{
 		"timeout":        timeout,
 		"packet_timeout": "0s",
 	})
@@ -187,8 +188,8 @@ func TestICMPPingDiscoveryModule_Execute(t *testing.T) {
 		}, nil
 	}
 
-	config := map[string]interface{}{
-		"targets":        []interface{}{"127.0.0.1", "127.0.0.2"}, // 127.0.0.2 likely won't respond unless explicitly set up
+	config := map[string]any{
+		"targets":        []any{"127.0.0.1", "127.0.0.2"}, // 127.0.0.2 likely won't respond unless explicitly set up
 		"timeout":        "200ms",
 		"count":          1,
 		"concurrency":    2,
@@ -223,13 +224,7 @@ func TestICMPPingDiscoveryModule_Execute(t *testing.T) {
 		}
 
 		// Check if 127.0.0.1 is in live hosts
-		foundLocalhost := false
-		for _, host := range result.LiveHosts {
-			if host == "127.0.0.1" {
-				foundLocalhost = true
-				break
-			}
-		}
+		foundLocalhost := slices.Contains(result.LiveHosts, "127.0.0.1")
 		if !foundLocalhost {
 			t.Errorf("Expected '127.0.0.1' to be in live hosts, got %v", result.LiveHosts)
 		}
@@ -311,7 +306,7 @@ func TestICMPPingDiscoveryModule_Execute_TargetsFromInput(t *testing.T) {
 	mod.config.Count = 1
 
 	out := make(chan engine.ModuleOutput, 1)
-	input := map[string]interface{}{
+	input := map[string]any{
 		"config.targets": []string{"127.0.0.1"},
 	}
 	err := mod.Execute(context.Background(), input, out)

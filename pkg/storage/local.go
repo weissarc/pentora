@@ -265,10 +265,7 @@ func (s *LocalScanStore) paginateScans(scans []*ScanMetadata, cursorData *Cursor
 	startIdx := s.findCursorPosition(scans, cursorData)
 
 	// Calculate page boundaries
-	endIdx := startIdx + limit
-	if endIdx > len(scans) {
-		endIdx = len(scans)
-	}
+	endIdx := min(startIdx+limit, len(scans))
 
 	page := scans[startIdx:endIdx]
 

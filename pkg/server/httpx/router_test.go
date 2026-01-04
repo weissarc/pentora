@@ -55,7 +55,7 @@ func TestHealthzHandler(t *testing.T) {
 
 func TestHealthzHandler_AlwaysReturnsOK(t *testing.T) {
 	// Test multiple calls to ensure idempotency
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 		w := httptest.NewRecorder()
 

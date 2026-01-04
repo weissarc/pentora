@@ -3,6 +3,7 @@ package scanexec
 import (
 	"context"
 	"fmt"
+	"maps"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,7 +19,7 @@ type dagPlanner interface {
 
 // Service orchestrates scan execution using the engine planner/orchestrator.
 type orchestrator interface {
-	Run(ctx context.Context, inputs map[string]interface{}) (map[string]interface{}, error)
+	Run(ctx context.Context, inputs map[string]any) (map[string]any, error)
 }
 
 type ProgressSink interface {
@@ -177,14 +178,12 @@ func (s *Service) Run(ctx context.Context, params Params) (*Result, error) {
 		return nil, fmt.Errorf("init orchestrator: %w", err)
 	}
 
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"config.targets":              params.Targets,
 		"config.original_cli_targets": params.Targets,
 		"config.output.format":        params.OutputFormat,
 	}
-	for k, v := range params.RawInputs {
-		inputs[k] = v
-	}
+	maps.Copy(inputs, params.RawInputs)
 
 	s.emit("run", "", dagDefinition.Name, "start", "")
 	// Use ctx (not appMgr.Context()) to preserve context values like output.OutputKey
@@ -274,7 +273,7 @@ func (s *Service) updateScanStatus(ctx context.Context, scanID, status, errorMsg
 }
 
 // updateScanStatistics extracts statistics from dataCtx and updates storage.
-func (s *Service) updateScanStatistics(ctx context.Context, scanID string, dataCtx map[string]interface{}) {
+func (s *Service) updateScanStatistics(ctx context.Context, scanID string, dataCtx map[string]any) {
 	if s.storage == nil || dataCtx == nil {
 		return
 	}
@@ -283,7 +282,7 @@ func (s *Service) updateScanStatistics(ctx context.Context, scanID string, dataC
 
 	// Extract host count from discovery results
 	if liveHosts, ok := dataCtx["discovery.live_hosts"]; ok {
-		if hosts, ok := liveHosts.([]interface{}); ok {
+		if hosts, ok := liveHosts.([]any); ok {
 			count := len(hosts)
 			updates.HostCount = &count
 		}
@@ -291,7 +290,7 @@ func (s *Service) updateScanStatistics(ctx context.Context, scanID string, dataC
 
 	// Extract service count from scan results
 	if services, ok := dataCtx["scan.services"]; ok {
-		if svcList, ok := services.([]interface{}); ok {
+		if svcList, ok := services.([]any); ok {
 			count := len(svcList)
 			updates.ServiceCount = &count
 		}
@@ -299,10 +298,10 @@ func (s *Service) updateScanStatistics(ctx context.Context, scanID string, dataC
 
 	// Extract vulnerability counts from evaluation results
 	if vulns, ok := dataCtx["vulnerability.results"]; ok {
-		if vulnList, ok := vulns.([]interface{}); ok {
+		if vulnList, ok := vulns.([]any); ok {
 			vulnCounts := storage.VulnCounts{}
 			for _, v := range vulnList {
-				if vulnMap, ok := v.(map[string]interface{}); ok {
+				if vulnMap, ok := v.(map[string]any); ok {
 					if severity, ok := vulnMap["severity"].(string); ok {
 						switch severity {
 						case "CRITICAL":

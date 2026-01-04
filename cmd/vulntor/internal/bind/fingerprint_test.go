@@ -12,13 +12,13 @@ import (
 func TestBindFingerprintOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		flags   map[string]interface{}
+		flags   map[string]any
 		want    FingerprintOptions
 		wantErr bool
 	}{
 		{
 			name: "all flags set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"file":      "/path/to/catalog.yaml",
 				"url":       "https://example.com/catalog",
 				"cache-dir": "/custom/cache",
@@ -27,7 +27,7 @@ func TestBindFingerprintOptions(t *testing.T) {
 		},
 		{
 			name: "only file set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"file":      "/local/catalog.yaml",
 				"url":       "",
 				"cache-dir": "",
@@ -41,7 +41,7 @@ func TestBindFingerprintOptions(t *testing.T) {
 		},
 		{
 			name: "only url set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"file":      "",
 				"url":       "https://probes.pentora.ai/catalog.yaml",
 				"cache-dir": "",
@@ -55,7 +55,7 @@ func TestBindFingerprintOptions(t *testing.T) {
 		},
 		{
 			name: "defaults (all empty)",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"file":      "",
 				"url":       "",
 				"cache-dir": "",
@@ -87,7 +87,7 @@ func TestBindFingerprintOptions(t *testing.T) {
 }
 
 // setupFingerprintCommand creates a mock command with fingerprint flags
-func setupFingerprintCommand(flags map[string]interface{}) *cobra.Command {
+func setupFingerprintCommand(flags map[string]any) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Flags().String("file", "", "File path")
 	cmd.Flags().String("url", "", "URL")

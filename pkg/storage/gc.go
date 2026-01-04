@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"slices"
 	"sort"
 	"time"
 )
@@ -126,13 +127,7 @@ func (b *LocalBackend) gcOrganization(ctx context.Context, orgID string, retenti
 		remaining := make([]*ScanMetadata, 0)
 		for _, scan := range scans {
 			// Check if already marked for deletion
-			markedForDeletion := false
-			for _, id := range toDelete {
-				if scan.ID == id {
-					markedForDeletion = true
-					break
-				}
-			}
+			markedForDeletion := slices.Contains(toDelete, scan.ID)
 			if !markedForDeletion {
 				remaining = append(remaining, scan)
 			}
@@ -141,7 +136,7 @@ func (b *LocalBackend) gcOrganization(ctx context.Context, orgID string, retenti
 		// If remaining count exceeds MaxScans, delete oldest
 		if len(remaining) > retention.MaxScans {
 			excessCount := len(remaining) - retention.MaxScans
-			for i := 0; i < excessCount; i++ {
+			for i := range excessCount {
 				toDelete = append(toDelete, remaining[i].ID)
 			}
 		}

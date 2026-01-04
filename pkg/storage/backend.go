@@ -183,8 +183,8 @@ type AuditLogger interface {
 
 // TimePeriod represents a time range for analytics queries.
 type TimePeriod struct {
-	Start interface{} // time.Time or duration string
-	End   interface{} // time.Time or duration string
+	Start any // time.Time or duration string
+	End   any // time.Time or duration string
 }
 
 // Analytics contains aggregated statistics for an organization.
@@ -205,12 +205,12 @@ type Analytics struct {
 
 // AuditEntry represents an audit log entry.
 type AuditEntry struct {
-	OrgID        string                 `json:"org_id"`
-	UserID       string                 `json:"user_id"`
-	Action       string                 `json:"action"`        // create_scan, delete_scan, etc.
-	ResourceType string                 `json:"resource_type"` // scan, user, org, etc.
-	ResourceID   string                 `json:"resource_id"`
-	IPAddress    string                 `json:"ip_address,omitempty"`
-	UserAgent    string                 `json:"user_agent,omitempty"`
-	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+	OrgID        string         `json:"org_id"`
+	UserID       string         `json:"user_id"`
+	Action       string         `json:"action"`        // create_scan, delete_scan, etc.
+	ResourceType string         `json:"resource_type"` // scan, user, org, etc.
+	ResourceID   string         `json:"resource_id"`
+	IPAddress    string         `json:"ip_address,omitempty"`
+	UserAgent    string         `json:"user_agent,omitempty"`
+	Metadata     map[string]any `json:"metadata,omitempty"`
 }

@@ -14,11 +14,11 @@ import (
 
 func TestAssetProfileBuilderHandlesEmptyInputs(t *testing.T) {
 	m := newAssetProfileBuilderModule()
-	if err := m.Init(assetProfileBuilderModuleTypeName, map[string]interface{}{}); err != nil {
+	if err := m.Init(assetProfileBuilderModuleTypeName, map[string]any{}); err != nil {
 		t.Fatalf("init: %v", err)
 	}
 	outCh := make(chan engine.ModuleOutput, 1)
-	if err := m.Execute(context.Background(), map[string]interface{}{}, outCh); err != nil {
+	if err := m.Execute(context.Background(), map[string]any{}, outCh); err != nil {
 		t.Fatalf("execute: %v", err)
 	}
 	select {
@@ -33,17 +33,17 @@ func TestAssetProfileBuilderHandlesEmptyInputs(t *testing.T) {
 
 func TestAssetProfileBuilderMergesParsedDetails(t *testing.T) {
 	m := newAssetProfileBuilderModule()
-	if err := m.Init(assetProfileBuilderModuleTypeName, map[string]interface{}{}); err != nil {
+	if err := m.Init(assetProfileBuilderModuleTypeName, map[string]any{}); err != nil {
 		t.Fatalf("init: %v", err)
 	}
 	target := "203.0.113.42"
 	port := 80
-	inputs := map[string]interface{}{
+	inputs := map[string]any{
 		"config.targets": []string{target},
-		"service.http.details": []interface{}{
+		"service.http.details": []any{
 			parse.HTTPParsedInfo{Target: target, Port: port, ServerProduct: "nginx", ServerVersion: "1.21.6"},
 		},
-		"service.ssh.details": []interface{}{
+		"service.ssh.details": []any{
 			parse.SSHParsedInfo{Target: target, Port: 22, Software: "OpenSSH", SoftwareVersion: "9.3"},
 		},
 	}

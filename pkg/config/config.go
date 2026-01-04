@@ -133,7 +133,7 @@ func (m *Manager) Get() Config {
 // GetValue retrieves a configuration value by key path.
 // Example: GetValue("modules.tcp-port-discovery.concurrency")
 // Returns nil if key doesn't exist.
-func (m *Manager) GetValue(key string) interface{} {
+func (m *Manager) GetValue(key string) any {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.koanfInstance.Get(key)
@@ -144,7 +144,7 @@ func (m *Manager) GetValue(key string) interface{} {
 // - Validating the key and value.
 // - Potentially re-unmarshaling or selectively updating m.currentConfig.
 // - Notifying other parts of the application about the change (e.g., via an event bus).
-func (m *Manager) UpdateRuntimeValue(key string, value interface{}) error {
+func (m *Manager) UpdateRuntimeValue(key string, value any) error {
 	return nil
 }
 
@@ -153,10 +153,10 @@ func (m *Manager) postProcessConfig() {}
 
 // DefaultConfigAsMap converts the DefaultConfig struct to a map[string]interface{}
 // for Koanf's confmap.Provider. This is a bit manual but ensures Koanf knows all keys.
-func DefaultConfigAsMap() map[string]interface{} {
+func DefaultConfigAsMap() map[string]any {
 	def := DefaultConfig()
 	// This can be done more elegantly with reflection or a library if the struct is very large.
-	return map[string]interface{}{
+	return map[string]any{
 		// Log configuration
 		"log.level":  def.Log.Level,
 		"log.format": def.Log.Format,

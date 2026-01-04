@@ -75,14 +75,14 @@ func TestPublishValue_Errors(t *testing.T) {
 	}
 
 	// Wrong cardinality
-	_ = dc.RegisterType("key.list", reflect.TypeOf([]string{}), CardinalityList)
+	_ = dc.RegisterType("key.list", reflect.TypeFor[[]string](), CardinalityList)
 	err = dc.PublishValue("key.list", []string{"a"})
 	if err == nil {
 		t.Fatal("expected error for wrong cardinality")
 	}
 
 	// Type mismatch
-	_ = dc.RegisterType("key.single", reflect.TypeOf([]string{}), CardinalitySingle)
+	_ = dc.RegisterType("key.single", reflect.TypeFor[[]string](), CardinalitySingle)
 	err = dc.PublishValue("key.single", "not-a-slice")
 	if err == nil {
 		t.Fatal("expected type mismatch error")
@@ -98,14 +98,14 @@ func TestAppendValue_Errors(t *testing.T) {
 	}
 
 	// Wrong cardinality
-	_ = dc.RegisterType("single.key", reflect.TypeOf("string"), CardinalitySingle)
+	_ = dc.RegisterType("single.key", reflect.TypeFor[string](), CardinalitySingle)
 	err = dc.AppendValue("single.key", "item")
 	if err == nil {
 		t.Fatal("expected error for non-list key")
 	}
 
 	// Type mismatch on existing slice
-	_ = dc.RegisterType("list.key", reflect.TypeOf([]string{}), CardinalityList)
+	_ = dc.RegisterType("list.key", reflect.TypeFor[[]string](), CardinalityList)
 	dc.data["list.key"] = []int{1}
 	err = dc.AppendValue("list.key", "item")
 	if err == nil {
@@ -120,7 +120,7 @@ func TestGetValue_Errors(t *testing.T) {
 		t.Fatal("expected error for unregistered key")
 	}
 
-	_ = dc.RegisterType("key", reflect.TypeOf([]string{}), CardinalitySingle)
+	_ = dc.RegisterType("key", reflect.TypeFor[[]string](), CardinalitySingle)
 	_, err = dc.GetValue("key")
 	if err == nil {
 		t.Fatal("expected error for missing value")
@@ -135,7 +135,7 @@ func TestGetValue_Errors(t *testing.T) {
 
 func TestCheckTypeLocked_AllPaths(t *testing.T) {
 	dc := NewDataContext()
-	sch := dataKeySchema{typ: reflect.TypeOf(""), cardinality: CardinalitySingle}
+	sch := dataKeySchema{typ: reflect.TypeFor[string](), cardinality: CardinalitySingle}
 
 	// nil value with non-interface/pointer should error
 	err := dc.checkTypeLocked(sch, nil)
@@ -158,7 +158,7 @@ func TestCheckTypeLocked_AllPaths(t *testing.T) {
 
 func TestGenericHelpers_Get_TypeAssertionFail(t *testing.T) {
 	dc := NewDataContext()
-	_ = dc.RegisterType("key", reflect.TypeOf([]string{}), CardinalitySingle)
+	_ = dc.RegisterType("key", reflect.TypeFor[[]string](), CardinalitySingle)
 	_ = dc.PublishValue("key", []string{"a"})
 	_, err := Get[string](dc, "key")
 	if err == nil {
@@ -172,7 +172,7 @@ func TestAddOrAppendToList_PromoteAndGetAll(t *testing.T) {
 	dc.AddOrAppendToList("direct.key", "y")
 	got, ok := dc.Get("direct.key")
 	require.True(t, ok)
-	require.Equal(t, []interface{}{"x", "y"}, got)
+	require.Equal(t, []any{"x", "y"}, got)
 	all := dc.GetAll()
 	require.Contains(t, all, "direct.key")
 }

@@ -511,7 +511,7 @@ func TestDAGSchema_ToDAGDefinition(t *testing.T) {
 						ID:       "node1",
 						Module:   "test.module1",
 						Produces: []string{"data.key1"},
-						Config:   map[string]interface{}{"param": "value1"},
+						Config:   map[string]any{"param": "value1"},
 					},
 					{
 						ID:        "node2",
@@ -519,7 +519,7 @@ func TestDAGSchema_ToDAGDefinition(t *testing.T) {
 						DependsOn: []string{"node1"},
 						Consumes:  []string{"data.key1"},
 						Produces:  []string{"data.key2"},
-						Config:    map[string]interface{}{"param": "value2"},
+						Config:    map[string]any{"param": "value2"},
 					},
 				},
 			},
@@ -535,7 +535,7 @@ func TestDAGSchema_ToDAGDefinition(t *testing.T) {
 				require.Equal(t, "value1", def.Nodes[0].Config["param"])
 
 				// Check __produces was added
-				produces, ok := def.Nodes[0].Config["__produces"].([]interface{})
+				produces, ok := def.Nodes[0].Config["__produces"].([]any)
 				require.True(t, ok)
 				require.Contains(t, produces, "data.key1")
 
@@ -545,17 +545,17 @@ func TestDAGSchema_ToDAGDefinition(t *testing.T) {
 				require.Equal(t, "value2", def.Nodes[1].Config["param"])
 
 				// Check __depends_on was added
-				depends, ok := def.Nodes[1].Config["__depends_on"].([]interface{})
+				depends, ok := def.Nodes[1].Config["__depends_on"].([]any)
 				require.True(t, ok)
 				require.Contains(t, depends, "node1")
 
 				// Check __consumes was added
-				consumes, ok := def.Nodes[1].Config["__consumes"].([]interface{})
+				consumes, ok := def.Nodes[1].Config["__consumes"].([]any)
 				require.True(t, ok)
 				require.Contains(t, consumes, "data.key1")
 
 				// Check __produces was added
-				produces2, ok := def.Nodes[1].Config["__produces"].([]interface{})
+				produces2, ok := def.Nodes[1].Config["__produces"].([]any)
 				require.True(t, ok)
 				require.Contains(t, produces2, "data.key2")
 			},
@@ -617,7 +617,7 @@ func TestDAGSchema_ToDAGDefinition(t *testing.T) {
 			expectError: false,
 			validate: func(t *testing.T, def *DAGDefinition) {
 				require.NotNil(t, def.Nodes[0].Config) // Should be created for __produces
-				produces, ok := def.Nodes[0].Config["__produces"].([]interface{})
+				produces, ok := def.Nodes[0].Config["__produces"].([]any)
 				require.True(t, ok)
 				require.Contains(t, produces, "data.key1")
 			},
@@ -651,14 +651,14 @@ func TestDAGSchema_ToDAGDefinition(t *testing.T) {
 				require.Len(t, def.Nodes, 3)
 
 				// Check node3 has multiple dependencies
-				depends, ok := def.Nodes[2].Config["__depends_on"].([]interface{})
+				depends, ok := def.Nodes[2].Config["__depends_on"].([]any)
 				require.True(t, ok)
 				require.Len(t, depends, 2)
 				require.Contains(t, depends, "node1")
 				require.Contains(t, depends, "node2")
 
 				// Check node3 has multiple consumes
-				consumes, ok := def.Nodes[2].Config["__consumes"].([]interface{})
+				consumes, ok := def.Nodes[2].Config["__consumes"].([]any)
 				require.True(t, ok)
 				require.Len(t, consumes, 3)
 				require.Contains(t, consumes, "data.key1")

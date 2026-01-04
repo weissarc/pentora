@@ -10,13 +10,13 @@ import (
 func TestBindDAGValidateOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		flags   map[string]interface{}
+		flags   map[string]any
 		want    DAGValidateOptions
 		wantErr bool
 	}{
 		{
 			name: "all flags set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"format": "yaml",
 				"strict": true,
 				"json":   true,
@@ -30,7 +30,7 @@ func TestBindDAGValidateOptions(t *testing.T) {
 		},
 		{
 			name: "defaults",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"format": "",
 				"strict": false,
 				"json":   false,
@@ -44,7 +44,7 @@ func TestBindDAGValidateOptions(t *testing.T) {
 		},
 		{
 			name: "strict mode only",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"format": "",
 				"strict": true,
 				"json":   false,
@@ -77,13 +77,13 @@ func TestBindDAGValidateOptions(t *testing.T) {
 func TestBindDAGExportOptions(t *testing.T) {
 	tests := []struct {
 		name    string
-		flags   map[string]interface{}
+		flags   map[string]any
 		want    DAGExportOptions
 		wantErr bool
 	}{
 		{
 			name: "all flags set",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"output":      "/tmp/dag.yaml",
 				"format":      "yaml",
 				"targets":     "192.168.1.0/24",
@@ -103,7 +103,7 @@ func TestBindDAGExportOptions(t *testing.T) {
 		},
 		{
 			name: "defaults",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"output":      "",
 				"format":      "yaml",
 				"targets":     "192.168.1.1",
@@ -123,7 +123,7 @@ func TestBindDAGExportOptions(t *testing.T) {
 		},
 		{
 			name: "json format with vuln",
-			flags: map[string]interface{}{
+			flags: map[string]any{
 				"output":      "/output/dag.json",
 				"format":      "json",
 				"targets":     "10.0.0.1",
@@ -160,7 +160,7 @@ func TestBindDAGExportOptions(t *testing.T) {
 }
 
 // setupDAGValidateCommand creates a mock command with dag validate flags
-func setupDAGValidateCommand(flags map[string]interface{}) *cobra.Command {
+func setupDAGValidateCommand(flags map[string]any) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Flags().String("format", "", "Format")
 	cmd.Flags().Bool("strict", false, "Strict")
@@ -181,7 +181,7 @@ func setupDAGValidateCommand(flags map[string]interface{}) *cobra.Command {
 }
 
 // setupDAGExportCommand creates a mock command with dag export flags
-func setupDAGExportCommand(flags map[string]interface{}) *cobra.Command {
+func setupDAGExportCommand(flags map[string]any) *cobra.Command {
 	cmd := &cobra.Command{}
 	cmd.Flags().String("output", "", "Output")
 	cmd.Flags().String("format", "yaml", "Format")

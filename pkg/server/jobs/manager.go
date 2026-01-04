@@ -9,7 +9,7 @@ import (
 type Job struct {
 	ID      string
 	Type    string
-	Payload interface{}
+	Payload any
 }
 
 // Status represents the current status of a job.

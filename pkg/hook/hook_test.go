@@ -59,7 +59,7 @@ func TestMultipleHooks(t *testing.T) {
 	const numHooks = 5
 	wg.Add(numHooks)
 
-	for i := 0; i < numHooks; i++ {
+	for range numHooks {
 		mgr.Register("test", func(ctx context.Context) {
 			defer wg.Done()
 			mu.Lock()
